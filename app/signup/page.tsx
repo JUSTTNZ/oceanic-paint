@@ -1,28 +1,26 @@
 "use client"
 
 import type React from "react"
-
 import { useState } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
-import { useDispatch } from "react-redux"
 import Navigation from "@/components/navigation"
 import Footer from "@/components/footer"
-import { login } from "@/lib/authSlice"
-import type { AppDispatch } from "@/lib/store"
+import { supabase } from "@/lib/supabase/client"
 
 export default function SignupPage() {
   const router = useRouter()
-  const dispatch = useDispatch<AppDispatch>()
   const [name, setName] = useState("")
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [confirmPassword, setConfirmPassword] = useState("")
   const [error, setError] = useState("")
+  const [successMessage, setSuccessMessage] = useState("")
 
-  const handleSignup = (e: React.FormEvent) => {
+  const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault()
     setError("")
+    setSuccessMessage("")
 
     if (!name || !email || !password || !confirmPassword) {
       setError("Please fill in all fields")
@@ -39,17 +37,25 @@ export default function SignupPage() {
       return
     }
 
-    // Mock signup logic
-    dispatch(
-      login({
-        id: Math.random().toString(),
-        email,
-        name,
-        isAdmin: false,
-      }),
-    )
+    const { error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        data: {
+          full_name: name,
+        },
+      },
+    })
 
-    router.push("/dashboard")
+    if (error) {
+      setError(error.message)
+    } else {
+      setSuccessMessage("Account created! Please check your email for a confirmation link.")
+      setName("")
+      setEmail("")
+      setPassword("")
+      setConfirmPassword("")
+    }
   }
 
   return (
@@ -65,6 +71,7 @@ export default function SignupPage() {
 
           <form onSubmit={handleSignup} className="bg-card border border-border rounded-lg p-8 space-y-4">
             {error && <div className="p-4 bg-destructive/10 text-destructive rounded text-sm">{error}</div>}
+            {successMessage && <div className="p-4 bg-green-500/10 text-green-500 rounded text-sm">{successMessage}</div>}
 
             <div>
               <label className="block text-sm font-medium text-foreground mb-2">Full Name</label>

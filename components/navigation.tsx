@@ -2,20 +2,37 @@
 
 import Link from "next/link"
 import { FaShoppingCart, FaBars, FaTimes, FaSignOutAlt, FaUser } from "react-icons/fa"
-import { useSelector, useDispatch } from "react-redux"
-import { useState } from "react"
-import { logout } from "@/lib/authSlice"
-import type { RootState } from "@/lib/store"
+import { useState, useEffect } from "react"
+import { useRouter } from "next/navigation"
 
-export default function Navigation() {
+import type { User } from "@supabase/supabase-js"
+import  { createSupabaseBrowserClient } from "@/lib/supabase/client"
+
+export default function Navigation({ user: initialUser }: { user: User | null }) {
   const [mobileOpen, setMobileOpen] = useState(false)
-  const dispatch = useDispatch()
-  const user = useSelector((state: RootState) => state.auth.user)
-  const cartItems = useSelector((state: RootState) => state.cart.items)
+  const [user, setUser] = useState(initialUser)
+  // const cartItems = [] // Temporarily disable cart
+  const router = useRouter()
+ const supabase = createSupabaseBrowserClient()
+  useEffect(() => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      setUser(session?.user ?? null)
+    })
 
-  const handleLogout = () => {
-    dispatch(logout())
+    return () => {
+      subscription.unsubscribe()
+    }
+  }, [])
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut()
+    router.push("/")
+    router.refresh()
   }
+
+  const userName = user?.user_metadata?.full_name || user?.email?.split("@")[0]
+  // In a real app, you'd want a more robust way to check for admin role
+  const isAdmin = user?.email?.endsWith('@oceanicpaint.com') 
 
   return (
     <nav className="sticky top-0 z-50 border-b border-border bg-background">
@@ -49,7 +66,7 @@ export default function Navigation() {
           <div className="flex items-center gap-4">
             {user ? (
               <div className="hidden md:flex items-center gap-4">
-                {user.isAdmin && (
+                {isAdmin && (
                   <Link
                     href="/admin"
                     className="px-4 py-2 bg-secondary text-secondary-foreground rounded font-medium text-sm hover:opacity-90 transition"
@@ -62,7 +79,7 @@ export default function Navigation() {
                   className="flex items-center gap-2 text-foreground hover:text-primary transition"
                 >
                   <FaUser size={18} />
-                  {user.name}
+                  {userName}
                 </Link>
                 <button onClick={handleLogout} className="text-foreground hover:text-primary transition">
                   <FaSignOutAlt size={18} />
@@ -85,11 +102,11 @@ export default function Navigation() {
             {/* Cart Icon */}
             <Link href="/cart" className="relative">
               <FaShoppingCart size={20} className="text-foreground hover:text-primary transition" />
-              {cartItems.length > 0 && (
+              {/* {cartItems.length > 0 && (
                 <span className="absolute -top-2 -right-2 bg-secondary text-secondary-foreground text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold">
                   {cartItems.length}
                 </span>
-              )}
+              )} */}
             </Link>
 
             {/* Mobile Menu Button */}
@@ -117,13 +134,13 @@ export default function Navigation() {
               </Link>
               {user ? (
                 <>
-                  {user.isAdmin && (
+                  {isAdmin && (
                     <Link href="/admin" className="px-4 py-2 bg-secondary text-secondary-foreground rounded">
                       Admin
                     </Link>
                   )}
                   <Link href="/dashboard" className="px-4 py-2 text-foreground hover:bg-muted rounded">
-                    Dashboard ({user.name})
+                    Dashboard ({userName})
                   </Link>
                   <button onClick={handleLogout} className="px-4 py-2 text-foreground hover:bg-muted rounded text-left">
                     Logout

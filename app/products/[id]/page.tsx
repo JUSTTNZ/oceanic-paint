@@ -5,14 +5,15 @@ import Image from "next/image"
 import Link from "next/link"
 import { FaStar, FaShoppingCart, FaChevronLeft } from "react-icons/fa"
 import { useDispatch } from "react-redux"
-import Navigation from "@/components/navigation"
-import Footer from "@/components/footer"
+"use client"
+
+import { useState } from "react"
+import Image from "next/image"
+import Link from "next/link"
+import { FaStar, FaShoppingCart, FaChevronLeft } from "react-icons/fa"
 import { mockPaints } from "@/lib/mockData"
-import { addToCart } from "@/lib/cartSlice"
-import type { AppDispatch } from "@/lib/store"
 
 export default function ProductDetail({ params }: { params: { id: string } }) {
-  const dispatch = useDispatch<AppDispatch>()
   const paint = mockPaints.find((p) => p.id === params.id)
   const [quantity, setQuantity] = useState(1)
   const [selectedSize, setSelectedSize] = useState(paint?.sizes[0] || "")
@@ -21,41 +22,25 @@ export default function ProductDetail({ params }: { params: { id: string } }) {
 
   if (!paint) {
     return (
-      <div className="min-h-screen flex flex-col bg-background">
-        <Navigation />
-        <div className="flex-1 flex items-center justify-center">
-          <div className="text-center">
-            <h1 className="text-2xl font-bold text-foreground">Product not found</h1>
-            <Link href="/products" className="mt-4 inline-block text-primary hover:underline">
-              Back to products
-            </Link>
-          </div>
+      <div className="flex-1 flex items-center justify-center">
+        <div className="text-center">
+          <h1 className="text-2xl font-bold text-foreground">Product not found</h1>
+          <Link href="/products" className="mt-4 inline-block text-primary hover:underline">
+            Back to products
+          </Link>
         </div>
-        <Footer />
       </div>
     )
   }
 
   const handleAddToCart = () => {
-    dispatch(
-      addToCart({
-        id: paint.id,
-        name: paint.name,
-        price: paint.price,
-        quantity,
-        size: selectedSize,
-        color: selectedColor,
-        image: paint.image,
-      }),
-    )
+    // Will be implemented later
     setAddedToCart(true)
     setTimeout(() => setAddedToCart(false), 2000)
   }
 
   return (
-    <div className="min-h-screen flex flex-col bg-background">
-      <Navigation />
-
+    <>
       <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 py-8 flex-1">
         <Link href="/products" className="inline-flex items-center gap-2 text-primary hover:underline mb-8">
           <FaChevronLeft size={18} />
@@ -185,8 +170,6 @@ export default function ProductDetail({ params }: { params: { id: string } }) {
           </div>
         </div>
       </div>
-
-      <Footer />
-    </div>
+    </>
   )
 }

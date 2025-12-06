@@ -3,17 +3,22 @@
 import Link from "next/link"
 import Image from "next/image"
 import { FaChevronRight, FaStar } from "react-icons/fa"
-import Navigation from "@/components/navigation"
-import Footer from "@/components/footer"
-import { mockPaints, mockCategories } from "@/lib/mockData"
+import { mockPaints } from "@/lib/mockData"
+
+// Add mockCategories array
+const mockCategories = [
+  "Interior",
+  "Exterior", 
+  "Specialty",
+  "Primer",
+  "Tools"
+]
 
 export default function Home() {
   const featuredProducts = mockPaints.slice(0, 3)
 
   return (
-    <div className="min-h-screen flex flex-col bg-background">
-      <Navigation />
-
+    <>
       {/* Hero Section */}
       <section className="bg-gradient-to-r from-primary/10 to-secondary/10 border-b border-border">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-20 md:py-28">
@@ -119,8 +124,6 @@ export default function Home() {
           </Link>
         </div>
       </section>
-
-      <Footer />
-    </div>
+    </>
   )
 }

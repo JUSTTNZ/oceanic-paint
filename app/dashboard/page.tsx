@@ -1,43 +1,31 @@
-"use client"
-
 import Link from "next/link"
-import { useSelector, useDispatch } from "react-redux"
-import { useRouter } from "next/navigation"
-import { useEffect } from "react"
-import { FaBox, FaUser, FaSignOutAlt } from "react-icons/fa"
-import Navigation from "@/components/navigation"
-import Footer from "@/components/footer"
-import { logout } from "@/lib/authSlice"
-import { mockOrders } from "@/lib/mockData"
-import type { RootState, AppDispatch } from "@/lib/store"
+import { redirect } from "next/navigation"
+import { FaBox, FaUser } from "react-icons/fa"
+import { createSupabaseServerClient } from "@/lib/supabase/server"
 
-export default function DashboardPage() {
-  const router = useRouter()
-  const dispatch = useDispatch<AppDispatch>()
-  const user = useSelector((state: RootState) => state.auth.user)
-
-  useEffect(() => {
-    if (!user) {
-      router.push("/login")
-    }
-  }, [user, router])
+export default async function DashboardPage() {
+  const supabase = await createSupabaseServerClient()
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
 
   if (!user) {
-    return null
+    redirect("/login")
   }
 
-  const handleLogout = () => {
-    dispatch(logout())
-    router.push("/")
-  }
+  const { data: orders, error } = await supabase
+    .from("orders")
+    .select("*")
+    .eq("user_id", user.id)
+    .order("created_at", { ascending: false })
+
+  const userName = user.user_metadata?.full_name || user.email
 
   return (
-    <div className="min-h-screen flex flex-col bg-background">
-      <Navigation />
-
+    <>
       <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 py-8 flex-1">
         <div className="mb-8">
-          <h1 className="font-grotesk text-3xl font-bold text-foreground">Welcome, {user.name}!</h1>
+          <h1 className="font-grotesk text-3xl font-bold text-foreground">Welcome, {userName}!</h1>
           <p className="text-muted-foreground">Manage your account and orders</p>
         </div>
 
@@ -49,7 +37,7 @@ export default function DashboardPage() {
                 <FaUser size={24} className="text-primary-foreground" />
               </div>
               <div>
-                <h2 className="font-grotesk font-bold text-foreground">{user.name}</h2>
+                <h2 className="font-grotesk font-bold text-foreground">{userName}</h2>
                 <p className="text-sm text-muted-foreground">{user.email}</p>
               </div>
             </div>
@@ -62,7 +50,7 @@ export default function DashboardPage() {
           <div className="bg-card border border-border rounded-lg p-6">
             <FaBox size={24} className="text-secondary mb-4" />
             <h3 className="font-grotesk font-bold text-foreground mb-2">Total Orders</h3>
-            <p className="text-3xl font-bold text-foreground mb-2">{mockOrders.length}</p>
+            <p className="text-3xl font-bold text-foreground mb-2">{orders?.length || 0}</p>
             <Link href="#orders" className="text-primary hover:underline text-sm font-medium">
               View Orders →
             </Link>
@@ -82,7 +70,7 @@ export default function DashboardPage() {
         {/* Orders Section */}
         <div id="orders" className="bg-card border border-border rounded-lg p-6 mb-8">
           <h2 className="font-grotesk text-2xl font-bold text-foreground mb-6">Recent Orders</h2>
-          {mockOrders.length > 0 ? (
+          {orders && orders.length > 0 ? (
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead className="border-b border-border">
@@ -96,16 +84,16 @@ export default function DashboardPage() {
                   </tr>
                 </thead>
                 <tbody>
-                  {mockOrders.map((order) => (
+                  {orders.map((order) => (
                     <tr key={order.id} className="border-b border-border hover:bg-muted/30 transition">
-                      <td className="py-4 px-4 text-foreground font-medium">{order.id}</td>
-                      <td className="py-4 px-4 text-foreground">{order.date}</td>
-                      <td className="py-4 px-4 text-foreground">{order.items} item(s)</td>
-                      <td className="py-4 px-4 text-foreground font-bold">${order.total.toFixed(2)}</td>
+                      <td className="py-4 px-4 text-foreground font-medium">ORD-{order.id.toString().slice(-6)}</td>
+                      <td className="py-4 px-4 text-foreground">{new Date(order.created_at).toLocaleDateString()}</td>
+                      <td className="py-4 px-4 text-foreground">{order.items.length} item(s)</td>
+                      <td className="py-4 px-4 text-foreground font-bold">${order.total_price.toFixed(2)}</td>
                       <td className="py-4 px-4">
                         <span
                           className={`px-3 py-1 rounded text-xs font-bold ${
-                            order.status === "Delivered"
+                            order.status === "delivered"
                               ? "bg-secondary/20 text-secondary"
                               : "bg-yellow-500/20 text-yellow-600"
                           }`}
@@ -122,33 +110,12 @@ export default function DashboardPage() {
               </table>
             </div>
           ) : (
-            <p className="text-muted-foreground">No orders yet.</p>
+            <p className="text-muted-foreground">{error ? `Error fetching orders: ${error.message}` : 'No orders yet.'}</p>
           )}
         </div>
-
-        {/* Quick Actions */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
-          <Link
-            href="/products"
-            className="p-6 bg-primary/10 border border-primary rounded-lg hover:bg-primary/20 transition"
-          >
-            <h3 className="font-bold text-primary mb-2">Continue Shopping</h3>
-            <p className="text-sm text-muted-foreground">Discover more paint products</p>
-          </Link>
-          <button
-            onClick={handleLogout}
-            className="p-6 bg-destructive/10 border border-destructive rounded-lg hover:bg-destructive/20 transition text-left"
-          >
-            <div className="flex items-center gap-2 mb-2">
-              <FaSignOutAlt size={18} className="text-destructive" />
-              <h3 className="font-bold text-destructive">Logout</h3>
-            </div>
-            <p className="text-sm text-muted-foreground">Sign out of your account</p>
-          </button>
-        </div>
+        
+        {/* Quick Actions have been removed as logout is in the main nav */}
       </div>
-
-      <Footer />
-    </div>
+    </>
   )
 }

@@ -1,44 +1,19 @@
 "use client"
 
 import { useState } from "react"
-import Navigation from "@/components/navigation"
-import Footer from "@/components/footer"
 import { FaChevronDown } from "react-icons/fa"
-
-const faqs = [
-  {
-    question: "What makes Oceanic Paint different?",
-    answer:
-      "Oceanic Paint is formulated with premium ingredients to provide superior coverage, durability, and color vibrancy. We're committed to quality and sustainability.",
-  },
-  {
-    question: "How long does paint typically last?",
-    answer:
-      "Interior paint typically lasts 3-5 years, while exterior paint lasts 5-7 years depending on climate and exposure. Regular maintenance can extend the life.",
-  },
-  {
-    question: "Do you offer custom colors?",
-    answer: "Yes! We offer color matching services. Visit our store or contact us to create your perfect shade.",
-  },
-  {
-    question: "What's your return policy?",
-    answer:
-      "We offer a 30-day satisfaction guarantee. If you're not happy with your purchase, return it for a full refund or exchange.",
-  },
-  {
-    question: "Do you ship internationally?",
-    answer:
-      "Currently, we ship within the continental US. Contact us for information about international shipping options.",
-  },
-]
 
 export default function FAQPage() {
   const [open, setOpen] = useState<number | null>(0)
-
-  return (
-    <div className="min-h-screen flex flex-col bg-background">
-      <Navigation />
-
+const faqs = [
+    {
+      question: "What types of paint do you offer?",
+      answer: "We offer a variety of paint types including interior, exterior, gloss, matte, semi-gloss, and eggshell finishes to suit your project needs.",
+    },
+ 
+  ]
+      return (
+    <>
       <div className="flex-1">
         <div className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8 py-12">
           <h1 className="font-grotesk text-4xl font-bold text-foreground mb-4 text-center">
@@ -63,8 +38,7 @@ export default function FAQPage() {
           </div>
         </div>
       </div>
-
-      <Footer />
-    </div>
+    </>
   )
 }
+

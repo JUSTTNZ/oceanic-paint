@@ -3,9 +3,7 @@
 import type React from "react"
 
 import { useState } from "react"
-import Navigation from "@/components/navigation"
-import Footer from "@/components/footer"
-import { FaEnvelope, FaPhone, FaMapMarkerAlt } from "react-icons/fa"
+import { FaEnvelope, FaMapMarkerAlt, FaPhone } from "react-icons/fa"
 
 export default function ContactPage() {
   const [submitted, setSubmitted] = useState(false)
@@ -17,9 +15,7 @@ export default function ContactPage() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col bg-background">
-      <Navigation />
-
+    <>
       <div className="flex-1">
         <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 py-12">
           <h1 className="font-grotesk text-4xl font-bold text-foreground mb-4 text-center">Get in Touch</h1>
@@ -108,8 +104,7 @@ export default function ContactPage() {
           </div>
         </div>
       </div>
-
-      <Footer />
-    </div>
+    </>
   )
 }
+

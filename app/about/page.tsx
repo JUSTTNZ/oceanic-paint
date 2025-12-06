@@ -1,12 +1,8 @@
 import Link from "next/link"
-import Navigation from "@/components/navigation"
-import Footer from "@/components/footer"
 
 export default function AboutPage() {
   return (
-    <div className="min-h-screen flex flex-col bg-background">
-      <Navigation />
-
+    <>
       <div className="flex-1">
         {/* Hero */}
         <section className="bg-primary text-primary-foreground py-16">
@@ -69,8 +65,7 @@ export default function AboutPage() {
           </div>
         </section>
       </div>
-
-      <Footer />
-    </div>
+    </>
   )
 }
+

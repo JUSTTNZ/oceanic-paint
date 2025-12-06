@@ -1,24 +1,20 @@
 "use client"
 
 import type React from "react"
-
 import { useState } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
-import { useDispatch } from "react-redux"
 import Navigation from "@/components/navigation"
 import Footer from "@/components/footer"
-import { login } from "@/lib/authSlice"
-import type { AppDispatch } from "@/lib/store"
+import { createSupabaseBrowserClient,  } from "@/lib/supabase/client"
 
 export default function LoginPage() {
   const router = useRouter()
-  const dispatch = useDispatch<AppDispatch>()
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [error, setError] = useState("")
-
-  const handleLogin = (e: React.FormEvent) => {
+  const supabase =  createSupabaseBrowserClient()
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
     setError("")
 
@@ -27,20 +23,17 @@ export default function LoginPage() {
       return
     }
 
-    // Mock login logic
-    dispatch(
-      login({
-        id: "1",
-        email,
-        name: email.split("@")[0],
-        isAdmin: email === "admin@oceanicpaint.com",
-      }),
-    )
+    const { error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    })
 
-    if (email === "admin@oceanicpaint.com") {
-      router.push("/admin")
+    if (error) {
+      setError(error.message)
     } else {
+      // Redirect to dashboard, the middleware will handle session refresh
       router.push("/dashboard")
+      router.refresh() // Force a refresh to update server components
     }
   }
 
@@ -94,13 +87,6 @@ export default function LoginPage() {
               Sign up
             </Link>
           </p>
-
-          <div className="mt-8 p-4 bg-muted/30 rounded text-sm text-muted-foreground">
-            <p className="font-bold mb-2">Demo Credentials:</p>
-            <p>User: user@example.com</p>
-            <p>Admin: admin@oceanicpaint.com</p>
-            <p>Password: any value</p>
-          </div>
         </div>
       </div>
 

@@ -1,40 +1,26 @@
-"use client"
-
-import { useSelector, useDispatch } from "react-redux"
-import { useRouter } from "next/navigation"
-import { useEffect } from "react"
-import { FaBox, FaShoppingCart, FaUsers, FaSignOutAlt } from "react-icons/fa"
+import { FaBox, FaShoppingCart, FaUsers } from "react-icons/fa"
 import Link from "next/link"
-import Navigation from "@/components/navigation"
-import Footer from "@/components/footer"
-import { logout } from "@/lib/authSlice"
-import { mockPaints, mockOrders } from "@/lib/mockData"
-import type { RootState, AppDispatch } from "@/lib/store"
+import { createSupabaseServerClient } from "@/lib/supabase/server"
+import { redirect } from "next/navigation"
 
-export default function AdminDashboard() {
-  const router = useRouter()
-  const dispatch = useDispatch<AppDispatch>()
-  const user = useSelector((state: RootState) => state.auth.user)
+export default async function AdminDashboard() {
+  const supabase = createSupabaseServerClient()
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
 
-  useEffect(() => {
-    if (!user?.isAdmin) {
-      router.push("/")
-    }
-  }, [user, router])
-
-  if (!user?.isAdmin) {
-    return null
+  // Basic admin check - in a real app, use custom claims or a roles table
+  if (!user || !user.email?.endsWith("@oceanicpaint.com")) {
+    redirect("/")
   }
 
-  const handleLogout = () => {
-    dispatch(logout())
-    router.push("/")
-  }
+  const { data: products } = await supabase.from("products").select("id")
+  const { data: orders } = await supabase.from("orders").select("total_price, created_at, items, status")
+
+  const totalRevenue = orders?.reduce((sum, o) => sum + o.total_price, 0) || 0
 
   return (
-    <div className="min-h-screen flex flex-col bg-background">
-      <Navigation />
-
+    <>
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8 flex-1">
         <div className="mb-8">
           <h1 className="font-grotesk text-3xl font-bold text-foreground">Admin Dashboard</h1>
@@ -46,21 +32,19 @@ export default function AdminDashboard() {
           <div className="bg-card border border-border rounded-lg p-6">
             <FaBox size={24} className="text-primary mb-4" />
             <h3 className="font-grotesk font-bold text-foreground mb-2">Total Products</h3>
-            <p className="text-3xl font-bold text-foreground">{mockPaints.length}</p>
+            <p className="text-3xl font-bold text-foreground">{products?.length || 0}</p>
           </div>
 
           <div className="bg-card border border-border rounded-lg p-6">
             <FaShoppingCart size={24} className="text-secondary mb-4" />
             <h3 className="font-grotesk font-bold text-foreground mb-2">Total Orders</h3>
-            <p className="text-3xl font-bold text-foreground">{mockOrders.length}</p>
+            <p className="text-3xl font-bold text-foreground">{orders?.length || 0}</p>
           </div>
 
           <div className="bg-card border border-border rounded-lg p-6">
             <FaUsers size={24} className="text-primary mb-4" />
             <h3 className="font-grotesk font-bold text-foreground mb-2">Total Revenue</h3>
-            <p className="text-3xl font-bold text-foreground">
-              ${mockOrders.reduce((sum, o) => sum + o.total, 0).toFixed(2)}
-            </p>
+            <p className="text-3xl font-bold text-foreground">${totalRevenue.toFixed(2)}</p>
           </div>
 
           <div className="bg-card border border-border rounded-lg p-6">
@@ -132,16 +116,16 @@ export default function AdminDashboard() {
                 </tr>
               </thead>
               <tbody>
-                {mockOrders.slice(0, 5).map((order) => (
+                {orders?.slice(0, 5).map((order: any) => (
                   <tr key={order.id} className="border-b border-border hover:bg-muted/30">
-                    <td className="py-4 px-4 text-foreground font-medium">{order.id}</td>
-                    <td className="py-4 px-4 text-foreground">{order.date}</td>
-                    <td className="py-4 px-4 text-foreground">{order.items}</td>
-                    <td className="py-4 px-4 text-foreground font-bold">${order.total.toFixed(2)}</td>
+                    <td className="py-4 px-4 text-foreground font-medium">ORD-{order.id.toString().slice(-6)}</td>
+                    <td className="py-4 px-4 text-foreground">{new Date(order.created_at).toLocaleDateString()}</td>
+                    <td className="py-4 px-4 text-foreground">{order.items.length}</td>
+                    <td className="py-4 px-4 text-foreground font-bold">${order.total_price.toFixed(2)}</td>
                     <td className="py-4 px-4">
                       <span
                         className={`px-3 py-1 rounded text-xs font-bold ${
-                          order.status === "Delivered"
+                          order.status === "delivered"
                             ? "bg-secondary/20 text-secondary"
                             : "bg-yellow-500/20 text-yellow-600"
                         }`}
@@ -155,18 +139,7 @@ export default function AdminDashboard() {
             </table>
           </div>
         </div>
-
-        {/* Logout */}
-        <button
-          onClick={handleLogout}
-          className="flex items-center gap-2 px-6 py-3 border-2 border-destructive text-destructive rounded font-bold hover:bg-destructive/10 transition"
-        >
-          <FaSignOutAlt size={18} />
-          Logout
-        </button>
       </div>
-
-      <Footer />
-    </div>
+    </>
   )
 }
