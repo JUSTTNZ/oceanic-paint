@@ -10,9 +10,9 @@ export default function Footer() {
           <div>
             <div className="flex items-center gap-2 mb-4">
               <div className="bg-primary p-2 rounded">
-                <span className="font-grotesk text-lg font-bold text-primary-foreground">EP</span>
+                <span className="font-grotesk text-lg font-bold text-primary-foreground">OP</span>
               </div>
-              <span className="font-grotesk font-bold text-foreground">Evans Paints</span>
+              <span className="font-grotesk font-bold text-foreground">Oceanic Paints</span>
             </div>
             <p className="text-muted-foreground text-sm">Premium paint products for every project.</p>
           </div>
@@ -73,7 +73,7 @@ export default function Footer() {
               <div className="flex items-center gap-2">
                 <Mail size={16} />
                 <a href="mailto:info@evanspaints.com" className="hover:text-primary transition">
-                  info@evanspaints.com
+                  info@oceanicpaints.com
                 </a>
               </div>
               <div className="flex items-center gap-2">
@@ -91,7 +91,7 @@ export default function Footer() {
         </div>
 
         <div className="border-t border-border mt-8 pt-8 text-center text-sm text-muted-foreground">
-          <p>&copy; 2025 Evans Paints. All rights reserved.</p>
+          <p>&copy; 2025 oceanic Paints. All rights reserved.</p>
         </div>
       </div>
     </footer>

@@ -14,6 +14,22 @@ export default function Home() {
   const [loading, setLoading] = useState(true)
   
   const supabase = createSupabaseBrowserClient()
+const categoryColors: Record<string, string> = {
+  "Interior": "bg-blue-100 text-blue-700",
+  "Exterior": "bg-green-100 text-green-700", 
+  "Gloss": "bg-yellow-100 text-yellow-700",
+  "Matte": "bg-purple-100 text-purple-700",
+  "Primer": "bg-gray-100 text-gray-700",
+  "Varnish": "bg-amber-100 text-amber-700",
+  "Eco-Friendly": "bg-emerald-100 text-emerald-700",
+}
+
+// Fallback for unknown categories
+const getCategoryColor = (category: string): string => {
+  return categoryColors[category] || "bg-primary/10 text-primary"
+}
+
+
 
   useEffect(() => {
     fetchData()
@@ -98,18 +114,27 @@ export default function Home() {
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4">
-              {categories.map((category) => (
-                <Link
-                  key={category}
-                  href={`/products?category=${category}`}
-                  className="p-6 border border-border rounded-lg hover:border-primary hover:shadow-md transition text-center group"
-                >
-                  <div className="w-16 h-16 bg-primary/10 rounded-lg mx-auto mb-4 group-hover:bg-primary/20 transition" />
-                  <h3 className="font-grotesk font-bold text-foreground group-hover:text-primary transition">
-                    {category}
-                  </h3>
-                </Link>
-              ))}
+           {categories.map((category) => {
+  const colorClass = getCategoryColor(category)
+  
+  return (
+    <Link
+      key={category}
+      href={`/products?category=${category}`}
+      className="p-6 border border-border rounded-lg hover:border-primary hover:shadow-md transition text-center group"
+    >
+      <div className={`w-16 h-16 ${colorClass.split(' ')[0]} rounded-lg mx-auto mb-4 group-hover:opacity-80 transition flex items-center justify-center`}>
+        {/* Optional: Add an icon or first letter */}
+        <span className={`text-lg font-bold ${colorClass.split(' ')[1]}`}>
+          {category.charAt(0)}
+        </span>
+      </div>
+      <h3 className="font-grotesk font-bold text-foreground group-hover:text-primary transition">
+        {category}
+      </h3>
+    </Link>
+  )
+})}
             </div>
           )}
         </div>

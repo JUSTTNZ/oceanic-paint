@@ -24,9 +24,9 @@ export default function Navigation() {
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2">
             <div className="bg-primary p-2 rounded">
-              <span className="font-grotesk text-lg font-bold text-primary-foreground">EP</span>
+              <span className="font-grotesk text-lg font-bold text-primary-foreground">OP</span>
             </div>
-            <span className="hidden font-grotesk font-bold text-foreground sm:inline">Evans Paints</span>
+            <span className="hidden font-grotesk font-bold text-foreground sm:inline">Oceanic Paints</span>
           </Link>
 
           {/* Desktop Links */}
