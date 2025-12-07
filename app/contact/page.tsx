@@ -32,8 +32,8 @@ export default function ContactPage() {
                 <Mail size={24} className="text-primary flex-shrink-0" />
                 <div>
                   <h3 className="font-bold text-foreground mb-1">Email</h3>
-                  <p className="text-muted-foreground">info@evanspaints.com</p>
-                  <p className="text-muted-foreground">support@evanspaints.com</p>
+                  <p className="text-muted-foreground">info@oceanic.com</p>
+                  <p className="text-muted-foreground">support@oceanic.com</p>
                 </div>
               </div>
 
