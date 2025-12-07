@@ -3,17 +3,16 @@
 import { useState } from "react"
 import Image from "next/image"
 import Link from "next/link"
-import { FaStar, FaShoppingCart, FaChevronLeft } from "react-icons/fa"
+import { Star, ShoppingCart, ChevronLeft } from "lucide-react"
 import { useDispatch } from "react-redux"
-"use client"
-
-import { useState } from "react"
-import Image from "next/image"
-import Link from "next/link"
-import { FaStar, FaShoppingCart, FaChevronLeft } from "react-icons/fa"
+import Navigation from "@/components/navigation"
+import Footer from "@/components/footer"
 import { mockPaints } from "@/lib/mockData"
+import { addToCart } from "@/lib/cartSlice"
+import type { AppDispatch } from "@/lib/store"
 
 export default function ProductDetail({ params }: { params: { id: string } }) {
+  const dispatch = useDispatch<AppDispatch>()
   const paint = mockPaints.find((p) => p.id === params.id)
   const [quantity, setQuantity] = useState(1)
   const [selectedSize, setSelectedSize] = useState(paint?.sizes[0] || "")
@@ -22,28 +21,44 @@ export default function ProductDetail({ params }: { params: { id: string } }) {
 
   if (!paint) {
     return (
-      <div className="flex-1 flex items-center justify-center">
-        <div className="text-center">
-          <h1 className="text-2xl font-bold text-foreground">Product not found</h1>
-          <Link href="/products" className="mt-4 inline-block text-primary hover:underline">
-            Back to products
-          </Link>
+      <div className="min-h-screen flex flex-col bg-background">
+        <Navigation />
+        <div className="flex-1 flex items-center justify-center">
+          <div className="text-center">
+            <h1 className="text-2xl font-bold text-foreground">Product not found</h1>
+            <Link href="/products" className="mt-4 inline-block text-primary hover:underline">
+              Back to products
+            </Link>
+          </div>
         </div>
+        <Footer />
       </div>
     )
   }
 
   const handleAddToCart = () => {
-    // Will be implemented later
+    dispatch(
+      addToCart({
+        id: paint.id,
+        name: paint.name,
+        price: paint.price,
+        quantity,
+        size: selectedSize,
+        color: selectedColor,
+        image: paint.image,
+      }),
+    )
     setAddedToCart(true)
     setTimeout(() => setAddedToCart(false), 2000)
   }
 
   return (
-    <>
+    <div className="min-h-screen flex flex-col bg-background">
+      <Navigation />
+
       <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 py-8 flex-1">
         <Link href="/products" className="inline-flex items-center gap-2 text-primary hover:underline mb-8">
-          <FaChevronLeft size={18} />
+          <ChevronLeft size={18} />
           Back to Products
         </Link>
 
@@ -68,7 +83,7 @@ export default function ProductDetail({ params }: { params: { id: string } }) {
             <div className="flex items-center gap-4 mb-6">
               <div className="flex items-center gap-2">
                 {[...Array(5)].map((_, i) => (
-                  <FaStar
+                  <Star
                     key={i}
                     size={20}
                     className={i < Math.floor(paint.rating) ? "text-secondary fill-secondary" : "text-muted"}
@@ -156,7 +171,7 @@ export default function ProductDetail({ params }: { params: { id: string } }) {
                   : "bg-primary text-primary-foreground hover:opacity-90"
               }`}
             >
-              <FaShoppingCart size={20} />
+              <ShoppingCart size={20} />
               {addedToCart ? "Added to Cart!" : "Add to Cart"}
             </button>
 
@@ -170,6 +185,8 @@ export default function ProductDetail({ params }: { params: { id: string } }) {
           </div>
         </div>
       </div>
-    </>
+
+      <Footer />
+    </div>
   )
 }

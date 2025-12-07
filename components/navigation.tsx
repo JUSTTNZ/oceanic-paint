@@ -1,38 +1,21 @@
 "use client"
 
 import Link from "next/link"
-import { FaShoppingCart, FaBars, FaTimes, FaSignOutAlt, FaUser } from "react-icons/fa"
-import { useState, useEffect } from "react"
-import { useRouter } from "next/navigation"
+import { ShoppingCart, Menu, X, LogOut, User } from "lucide-react"
+import { useSelector, useDispatch } from "react-redux"
+import { useState } from "react"
+import { logout } from "@/lib/authSlice"
+import type { RootState } from "@/lib/store"
 
-import type { User } from "@supabase/supabase-js"
-import  { createSupabaseBrowserClient } from "@/lib/supabase/client"
-
-export default function Navigation({ user: initialUser }: { user: User | null }) {
+export default function Navigation() {
   const [mobileOpen, setMobileOpen] = useState(false)
-  const [user, setUser] = useState(initialUser)
-  // const cartItems = [] // Temporarily disable cart
-  const router = useRouter()
- const supabase = createSupabaseBrowserClient()
-  useEffect(() => {
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      setUser(session?.user ?? null)
-    })
+  const dispatch = useDispatch()
+  const user = useSelector((state: RootState) => state.auth.user)
+  const cartItems = useSelector((state: RootState) => state.cart.items)
 
-    return () => {
-      subscription.unsubscribe()
-    }
-  }, [])
-
-  const handleLogout = async () => {
-    await supabase.auth.signOut()
-    router.push("/")
-    router.refresh()
+  const handleLogout = () => {
+    dispatch(logout())
   }
-
-  const userName = user?.user_metadata?.full_name || user?.email?.split("@")[0]
-  // In a real app, you'd want a more robust way to check for admin role
-  const isAdmin = user?.email?.endsWith('@oceanicpaint.com') 
 
   return (
     <nav className="sticky top-0 z-50 border-b border-border bg-background">
@@ -41,9 +24,9 @@ export default function Navigation({ user: initialUser }: { user: User | null })
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2">
             <div className="bg-primary p-2 rounded">
-              <span className="font-grotesk text-lg font-bold text-primary-foreground">OP</span>
+              <span className="font-grotesk text-lg font-bold text-primary-foreground">EP</span>
             </div>
-            <span className="hidden font-grotesk font-bold text-foreground sm:inline">Oceanic Paint</span>
+            <span className="hidden font-grotesk font-bold text-foreground sm:inline">Evans Paints</span>
           </Link>
 
           {/* Desktop Links */}
@@ -66,7 +49,7 @@ export default function Navigation({ user: initialUser }: { user: User | null })
           <div className="flex items-center gap-4">
             {user ? (
               <div className="hidden md:flex items-center gap-4">
-                {isAdmin && (
+                {user.isAdmin && (
                   <Link
                     href="/admin"
                     className="px-4 py-2 bg-secondary text-secondary-foreground rounded font-medium text-sm hover:opacity-90 transition"
@@ -78,11 +61,11 @@ export default function Navigation({ user: initialUser }: { user: User | null })
                   href="/dashboard"
                   className="flex items-center gap-2 text-foreground hover:text-primary transition"
                 >
-                  <FaUser size={18} />
-                  {userName}
+                  <User size={18} />
+                  {user.name}
                 </Link>
                 <button onClick={handleLogout} className="text-foreground hover:text-primary transition">
-                  <FaSignOutAlt size={18} />
+                  <LogOut size={18} />
                 </button>
               </div>
             ) : (
@@ -101,17 +84,17 @@ export default function Navigation({ user: initialUser }: { user: User | null })
 
             {/* Cart Icon */}
             <Link href="/cart" className="relative">
-              <FaShoppingCart size={20} className="text-foreground hover:text-primary transition" />
-              {/* {cartItems.length > 0 && (
+              <ShoppingCart size={20} className="text-foreground hover:text-primary transition" />
+              {cartItems.length > 0 && (
                 <span className="absolute -top-2 -right-2 bg-secondary text-secondary-foreground text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold">
                   {cartItems.length}
                 </span>
-              )} */}
+              )}
             </Link>
 
             {/* Mobile Menu Button */}
             <button onClick={() => setMobileOpen(!mobileOpen)} className="md:hidden text-foreground">
-              {mobileOpen ? <FaTimes size={24} /> : <FaBars size={24} />}
+              {mobileOpen ? <X size={24} /> : <Menu size={24} />}
             </button>
           </div>
         </div>
@@ -134,13 +117,13 @@ export default function Navigation({ user: initialUser }: { user: User | null })
               </Link>
               {user ? (
                 <>
-                  {isAdmin && (
+                  {user.isAdmin && (
                     <Link href="/admin" className="px-4 py-2 bg-secondary text-secondary-foreground rounded">
                       Admin
                     </Link>
                   )}
                   <Link href="/dashboard" className="px-4 py-2 text-foreground hover:bg-muted rounded">
-                    Dashboard ({userName})
+                    Dashboard ({user.name})
                   </Link>
                   <button onClick={handleLogout} className="px-4 py-2 text-foreground hover:bg-muted rounded text-left">
                     Logout

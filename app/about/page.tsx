@@ -1,13 +1,17 @@
 import Link from "next/link"
+import Navigation from "@/components/navigation"
+import Footer from "@/components/footer"
 
 export default function AboutPage() {
   return (
-    <>
+    <div className="min-h-screen flex flex-col bg-background">
+      <Navigation />
+
       <div className="flex-1">
         {/* Hero */}
         <section className="bg-primary text-primary-foreground py-16">
           <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8 text-center">
-            <h1 className="font-grotesk text-4xl font-bold mb-4">About Oceanic Paint</h1>
+            <h1 className="font-grotesk text-4xl font-bold mb-4">About Evans Paints</h1>
             <p className="text-lg opacity-90">Premium paint solutions for over 20 years</p>
           </div>
         </section>
@@ -18,7 +22,7 @@ export default function AboutPage() {
             <div>
               <h2 className="font-grotesk text-3xl font-bold text-foreground mb-4">Our Story</h2>
               <p className="text-muted-foreground leading-relaxed">
-                Oceanic Paint has been dedicated to providing high-quality paint products since 2004. We started as a
+                Evans Paints has been dedicated to providing high-quality paint products since 2004. We started as a
                 small local business and have grown to serve thousands of customers nationwide. Our commitment to
                 quality, innovation, and customer satisfaction remains unwavering.
               </p>
@@ -65,7 +69,8 @@ export default function AboutPage() {
           </div>
         </section>
       </div>
-    </>
+
+      <Footer />
+    </div>
   )
 }
-

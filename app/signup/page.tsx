@@ -4,24 +4,27 @@ import type React from "react"
 import { useState } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
+import { useDispatch } from "react-redux"
 import Navigation from "@/components/navigation"
 import Footer from "@/components/footer"
-import { supabase } from "@/lib/supabase/client"
+import { login } from "@/lib/authSlice"
+import type { AppDispatch } from "@/lib/store"
 
 export default function SignupPage() {
   const router = useRouter()
+  const dispatch = useDispatch<AppDispatch>()
   const [name, setName] = useState("")
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [confirmPassword, setConfirmPassword] = useState("")
   const [error, setError] = useState("")
-  const [successMessage, setSuccessMessage] = useState("")
+  const [loading, setLoading] = useState(false)
 
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault()
     setError("")
-    setSuccessMessage("")
 
+    // Validation
     if (!name || !email || !password || !confirmPassword) {
       setError("Please fill in all fields")
       return
@@ -37,24 +40,59 @@ export default function SignupPage() {
       return
     }
 
-    const { error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        data: {
-          full_name: name,
-        },
-      },
-    })
+    // Email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+    if (!emailRegex.test(email)) {
+      setError("Please enter a valid email address")
+      return
+    }
 
-    if (error) {
-      setError(error.message)
-    } else {
-      setSuccessMessage("Account created! Please check your email for a confirmation link.")
-      setName("")
-      setEmail("")
-      setPassword("")
-      setConfirmPassword("")
+    setLoading(true)
+
+    try {
+      // Call the signup API endpoint
+      const response = await fetch("/api/auth/signup", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          fullName: name,
+          email,
+          password,
+        }),
+      })
+
+      const data = await response.json()
+console.log("Signup response data:", data)
+ console.log("Full response status:", response.status)
+  console.log("Full response data:", data)
+  console.log("User data:", data.user)
+  console.log("Error from API:", data.error)
+      if (!response.ok) {
+        throw new Error(data.error || data.message || "Signup failed")
+      }
+ console.log("User ID for profile:", data.user?.id)
+  console.log("Profile data:", data.user?.profile)
+  console.log("User metadata:", data.user?.user_metadata)
+      // If signup was successful, log the user in
+    //   dispatch(
+    //     login({
+    //       id: data.user.id || Math.random().toString(),
+    //       email: data.user.email,
+    //       name: data.user.name,
+        
+    // isAdmin: (data.user.role === "admin") || false,
+   
+    //     }),
+    //   )
+
+      // Redirect to dashboard
+      router.push("/login")
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "An error occurred during signup")
+    } finally {
+      setLoading(false)
     }
   }
 
@@ -65,13 +103,12 @@ export default function SignupPage() {
       <div className="flex-1 flex items-center justify-center px-4 py-12">
         <div className="w-full max-w-md">
           <div className="text-center mb-8">
-            <h1 className="font-grotesk text-3xl font-bold text-foreground mb-2">Join Oceanic Paint</h1>
+            <h1 className="font-grotesk text-3xl font-bold text-foreground mb-2">Join Evans Paints</h1>
             <p className="text-muted-foreground">Create your account to get started</p>
           </div>
 
           <form onSubmit={handleSignup} className="bg-card border border-border rounded-lg p-8 space-y-4">
             {error && <div className="p-4 bg-destructive/10 text-destructive rounded text-sm">{error}</div>}
-            {successMessage && <div className="p-4 bg-green-500/10 text-green-500 rounded text-sm">{successMessage}</div>}
 
             <div>
               <label className="block text-sm font-medium text-foreground mb-2">Full Name</label>
@@ -81,6 +118,8 @@ export default function SignupPage() {
                 onChange={(e) => setName(e.target.value)}
                 className="w-full px-4 py-2 border border-border rounded bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
                 placeholder="John Doe"
+                disabled={loading}
+                required
               />
             </div>
 
@@ -92,6 +131,8 @@ export default function SignupPage() {
                 onChange={(e) => setEmail(e.target.value)}
                 className="w-full px-4 py-2 border border-border rounded bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
                 placeholder="you@example.com"
+                disabled={loading}
+                required
               />
             </div>
 
@@ -103,6 +144,9 @@ export default function SignupPage() {
                 onChange={(e) => setPassword(e.target.value)}
                 className="w-full px-4 py-2 border border-border rounded bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
                 placeholder="••••••••"
+                disabled={loading}
+                required
+                minLength={6}
               />
             </div>
 
@@ -114,14 +158,18 @@ export default function SignupPage() {
                 onChange={(e) => setConfirmPassword(e.target.value)}
                 className="w-full px-4 py-2 border border-border rounded bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
                 placeholder="••••••••"
+                disabled={loading}
+                required
+                minLength={6}
               />
             </div>
 
             <button
               type="submit"
-              className="w-full py-2 bg-primary text-primary-foreground rounded font-bold hover:opacity-90 transition"
+              disabled={loading}
+              className="w-full py-2 bg-primary text-primary-foreground rounded font-bold hover:opacity-90 transition disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              Create Account
+              {loading ? "Creating Account..." : "Create Account"}
             </button>
           </form>
 

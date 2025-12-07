@@ -1,32 +1,44 @@
 "use client"
 
 import { useState } from "react"
-import { FaChevronRight } from "react-icons/fa"
+import { ChevronRight } from "lucide-react"
+import { useDispatch } from "react-redux"
+import Navigation from "@/components/navigation"
+import Footer from "@/components/footer"
+import { addToCart } from "@/lib/cartSlice"
+import { mockSizes, mockColors } from "@/lib/mockData"
+import type { AppDispatch } from "@/lib/store"
 
 export default function BuildOrderPage() {
-  const mockColors = ["Alabaster White", "Ocean Blue", "Sunset Orange", "Forest Green", "Midnight Black", "Sunny Yellow", "Coral Pink", "Sky Gray"]
-  const mockSizes = ["1 Gallon", "5 Gallons", "1 Quart", "1 Pint"]
+  const dispatch = useDispatch<AppDispatch>()
   const [paintType, setPaintType] = useState("Interior")
   const [finish, setFinish] = useState("Matte")
   const [selectedColor, setSelectedColor] = useState(mockColors[0])
   const [selectedSize, setSelectedSize] = useState(mockSizes[0])
   const [quantity, setQuantity] = useState(1)
-  const [added, setAdded] = useState(false)
-
 
   const paintTypes = ["Interior", "Exterior", "Gloss"]
   const finishes = ["Matte", "Gloss", "Semi-Gloss", "Eggshell"]
   const basePrice = 45.99
 
   const handleAddToCart = () => {
-    // Will be implemented later
-    console.log("Add to cart clicked");
-    setAdded(true)
-    setTimeout(() => setAdded(false), 2000)
+    dispatch(
+      addToCart({
+        id: `custom-${Math.random()}`,
+        name: `${paintType} ${finish} Paint`,
+        price: basePrice,
+        quantity,
+        size: selectedSize,
+        color: selectedColor,
+        image: "/custom-paint-bucket.jpg",
+      }),
+    )
   }
 
   return (
-    <>
+    <div className="min-h-screen flex flex-col bg-background">
+      <Navigation />
+
       <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 py-8 flex-1">
         <div className="mb-8">
           <h1 className="font-grotesk text-4xl font-bold text-foreground mb-2">Build Your Own Paint Order</h1>
@@ -192,15 +204,17 @@ export default function BuildOrderPage() {
 
               <button
                 onClick={handleAddToCart}
-                className={`w-full py-3 text-primary-foreground rounded font-bold hover:opacity-90 transition flex items-center justify-center gap-2 ${ added ? 'bg-secondary' : 'bg-primary'}`}
+                className="w-full py-3 bg-primary text-primary-foreground rounded font-bold hover:opacity-90 transition flex items-center justify-center gap-2"
               >
-                {added ? 'Added to cart!' : 'Add to Cart'}
-                <FaChevronRight size={18} />
+                Add to Cart
+                <ChevronRight size={18} />
               </button>
             </div>
           </div>
         </div>
       </div>
-    </>
+
+      <Footer />
+    </div>
   )
 }

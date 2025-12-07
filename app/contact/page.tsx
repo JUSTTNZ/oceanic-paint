@@ -3,7 +3,9 @@
 import type React from "react"
 
 import { useState } from "react"
-import { FaEnvelope, FaMapMarkerAlt, FaPhone } from "react-icons/fa"
+import Navigation from "@/components/navigation"
+import Footer from "@/components/footer"
+import { Mail, Phone, MapPin } from "lucide-react"
 
 export default function ContactPage() {
   const [submitted, setSubmitted] = useState(false)
@@ -15,7 +17,9 @@ export default function ContactPage() {
   }
 
   return (
-    <>
+    <div className="min-h-screen flex flex-col bg-background">
+      <Navigation />
+
       <div className="flex-1">
         <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 py-12">
           <h1 className="font-grotesk text-4xl font-bold text-foreground mb-4 text-center">Get in Touch</h1>
@@ -25,16 +29,16 @@ export default function ContactPage() {
             {/* Contact Info */}
             <div className="space-y-8">
               <div className="flex gap-4">
-                <FaEnvelope size={24} className="text-primary flex-shrink-0" />
+                <Mail size={24} className="text-primary flex-shrink-0" />
                 <div>
                   <h3 className="font-bold text-foreground mb-1">Email</h3>
-                  <p className="text-muted-foreground">info@oceanicpaint.com</p>
-                  <p className="text-muted-foreground">support@oceanicpaint.com</p>
+                  <p className="text-muted-foreground">info@evanspaints.com</p>
+                  <p className="text-muted-foreground">support@evanspaints.com</p>
                 </div>
               </div>
 
               <div className="flex gap-4">
-                <FaPhone size={24} className="text-primary flex-shrink-0" />
+                <Phone size={24} className="text-primary flex-shrink-0" />
                 <div>
                   <h3 className="font-bold text-foreground mb-1">Phone</h3>
                   <p className="text-muted-foreground">+1 (234) 567-890</p>
@@ -43,7 +47,7 @@ export default function ContactPage() {
               </div>
 
               <div className="flex gap-4">
-                <FaMapMarkerAlt size={24} className="text-primary flex-shrink-0" />
+                <MapPin size={24} className="text-primary flex-shrink-0" />
                 <div>
                   <h3 className="font-bold text-foreground mb-1">Address</h3>
                   <p className="text-muted-foreground">123 Paint Street</p>
@@ -104,7 +108,8 @@ export default function ContactPage() {
           </div>
         </div>
       </div>
-    </>
+
+      <Footer />
+    </div>
   )
 }
-

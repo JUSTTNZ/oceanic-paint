@@ -1,10 +1,9 @@
+import type React from "react"
 import type { Metadata } from "next"
 import { Geist, Geist_Mono, Inter, Host_Grotesk as Grotesk } from "next/font/google"
 import { Analytics } from "@vercel/analytics/next"
 import "./globals.css"
-import Navigation from "@/components/navigation"
-import Footer from "@/components/footer"
-import { createSupabaseServerClient } from "@/lib/supabase/server"
+import { Providers } from "./providers"
 
 const _geist = Geist({ subsets: ["latin"] })
 const _geistMono = Geist_Mono({ subsets: ["latin"] })
@@ -12,7 +11,7 @@ const _inter = Inter({ subsets: ["latin"] })
 const _grotesk = Grotesk({ subsets: ["latin"], variable: "--font-grotesk" })
 
 export const metadata: Metadata = {
-  title: "Oceanic Paint - Premium Paint Products",
+  title: "Evans Paints - Premium Paint Products",
   description: "High-quality paint products for interior, exterior, and specialized finishes",
   generator: "v0.app",
   icons: {
@@ -34,29 +33,15 @@ export const metadata: Metadata = {
   },
 }
 
-export default async function RootLayout({
+export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode
 }>) {
-  let user = null
-  
-  try {
-    // Add await here since createSupabaseServerClient is async
-    const supabase = await createSupabaseServerClient()
-    const { data } = await supabase.auth.getUser()
-    user = data.user
-  } catch (error) {
-    console.error('Error fetching user:', error)
-    // Continue without user data if there's an error
-  }
-
   return (
     <html lang="en">
-      <body className={`font-sans antialiased ${_grotesk.variable} flex flex-col min-h-screen`}>
-        <Navigation user={user} />
-        <main className="flex-1">{children}</main>
-        <Footer />
+      <body className={`font-sans antialiased ${_grotesk.variable}`}>
+        <Providers>{children}</Providers>
         <Analytics />
       </body>
     </html>

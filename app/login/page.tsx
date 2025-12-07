@@ -4,36 +4,88 @@ import type React from "react"
 import { useState } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
+import { useDispatch } from "react-redux"
 import Navigation from "@/components/navigation"
 import Footer from "@/components/footer"
-import { createSupabaseBrowserClient,  } from "@/lib/supabase/client"
+import { login } from "@/lib/authSlice"
+import type { AppDispatch } from "@/lib/store"
+import { createSupabaseBrowserClient } from "@/lib/supabase/client"
 
 export default function LoginPage() {
   const router = useRouter()
+  const dispatch = useDispatch<AppDispatch>()
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [error, setError] = useState("")
-  const supabase =  createSupabaseBrowserClient()
+  const [loading, setLoading] = useState(false)
+
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
     setError("")
+    setLoading(true)
 
     if (!email || !password) {
       setError("Please fill in all fields")
+      setLoading(false)
       return
     }
 
-    const { error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    })
+    try {
+      // Use the API route instead of direct Supabase
+      const response = await fetch("/api/auth/signin", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          email,
+          password,
+        }),
+      })
 
-    if (error) {
-      setError(error.message)
-    } else {
-      // Redirect to dashboard, the middleware will handle session refresh
-      router.push("/dashboard")
-      router.refresh() // Force a refresh to update server components
+      const data = await response.json()
+      
+      console.log("Login response:", data)
+      
+      if (!response.ok) {
+        throw new Error(data.error || "Login failed")
+      }
+
+      // Get the user role
+      const userRole = data.role || "customer"
+      console.log("User role:", userRole)
+      
+      // Dispatch to Redux with correct role
+      dispatch(
+        login({
+          id: data.user.id,
+          email: data.user.email,
+          name: data.user.full_name || data.user.user_metadata?.display_name || email.split('@')[0],
+          role: userRole,
+          isAdmin: userRole === "admin",
+        })
+      )
+
+      // IMPORTANT: Also set up Supabase session client-side
+      const supabase = createSupabaseBrowserClient()
+      await supabase.auth.getSession() // This will sync the session
+
+      // REDIRECT BASED ON ROLE
+      if (userRole === "admin") {
+        console.log("Admin user detected, redirecting to admin dashboard")
+        router.push("/admin")
+      } else {
+        console.log("Regular user detected, redirecting to dashboard")
+        router.push("/dashboard")
+      }
+      
+      router.refresh()
+      
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Login failed")
+      console.error("Login error:", err)
+    } finally {
+      setLoading(false)
     }
   }
 
@@ -59,6 +111,8 @@ export default function LoginPage() {
                 onChange={(e) => setEmail(e.target.value)}
                 className="w-full px-4 py-2 border border-border rounded bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
                 placeholder="you@example.com"
+                disabled={loading}
+                required
               />
             </div>
 
@@ -70,14 +124,17 @@ export default function LoginPage() {
                 onChange={(e) => setPassword(e.target.value)}
                 className="w-full px-4 py-2 border border-border rounded bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
                 placeholder="••••••••"
+                disabled={loading}
+                required
               />
             </div>
 
             <button
               type="submit"
-              className="w-full py-2 bg-primary text-primary-foreground rounded font-bold hover:opacity-90 transition"
+              disabled={loading}
+              className="w-full py-2 bg-primary text-primary-foreground rounded font-bold hover:opacity-90 transition disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              Sign In
+              {loading ? "Signing in..." : "Sign In"}
             </button>
           </form>
 
