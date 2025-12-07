@@ -3,13 +3,13 @@
 import { useState } from "react"
 import Navigation from "@/components/navigation"
 import Footer from "@/components/footer"
-import { FaChevronDown } from "react-icons/fa"
+import { ChevronDown } from "lucide-react"
 
 const faqs = [
   {
-    question: "What makes Oceanic Paint different?",
+    question: "What makes Evans Paints different?",
     answer:
-      "Oceanic Paint is formulated with premium ingredients to provide superior coverage, durability, and color vibrancy. We're committed to quality and sustainability.",
+      "Evans Paints are formulated with premium ingredients to provide superior coverage, durability, and color vibrancy. We're committed to quality and sustainability.",
   },
   {
     question: "How long does paint typically last?",
@@ -44,7 +44,7 @@ export default function FAQPage() {
           <h1 className="font-grotesk text-4xl font-bold text-foreground mb-4 text-center">
             Frequently Asked Questions
           </h1>
-          <p className="text-center text-muted-foreground mb-12">Find answers to common questions about Oceanic Paint</p>
+          <p className="text-center text-muted-foreground mb-12">Find answers to common questions about Evans Paints</p>
 
           <div className="space-y-4">
             {faqs.map((faq, idx) => (
@@ -55,7 +55,7 @@ export default function FAQPage() {
               >
                 <div className="flex items-center justify-between">
                   <h3 className="font-grotesk font-bold text-foreground">{faq.question}</h3>
-                  <FaChevronDown size={20} className={`text-primary transition ${open === idx ? "rotate-180" : ""}`} />
+                  <ChevronDown size={20} className={`text-primary transition ${open === idx ? "rotate-180" : ""}`} />
                 </div>
                 {open === idx && <p className="text-muted-foreground mt-4">{faq.answer}</p>}
               </button>

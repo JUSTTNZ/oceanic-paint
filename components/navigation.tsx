@@ -1,7 +1,7 @@
 "use client"
 
 import Link from "next/link"
-import { FaShoppingCart, FaBars, FaTimes, FaSignOutAlt, FaUser } from "react-icons/fa"
+import { ShoppingCart, Menu, X, LogOut, User } from "lucide-react"
 import { useSelector, useDispatch } from "react-redux"
 import { useState } from "react"
 import { logout } from "@/lib/authSlice"
@@ -26,7 +26,7 @@ export default function Navigation() {
             <div className="bg-primary p-2 rounded">
               <span className="font-grotesk text-lg font-bold text-primary-foreground">OP</span>
             </div>
-            <span className="hidden font-grotesk font-bold text-foreground sm:inline">Oceanic Paint</span>
+            <span className="hidden font-grotesk font-bold text-foreground sm:inline">Oceanic Paints</span>
           </Link>
 
           {/* Desktop Links */}
@@ -61,11 +61,11 @@ export default function Navigation() {
                   href="/dashboard"
                   className="flex items-center gap-2 text-foreground hover:text-primary transition"
                 >
-                  <FaUser size={18} />
+                  <User size={18} />
                   {user.name}
                 </Link>
                 <button onClick={handleLogout} className="text-foreground hover:text-primary transition">
-                  <FaSignOutAlt size={18} />
+                  <LogOut size={18} />
                 </button>
               </div>
             ) : (
@@ -84,7 +84,7 @@ export default function Navigation() {
 
             {/* Cart Icon */}
             <Link href="/cart" className="relative">
-              <FaShoppingCart size={20} className="text-foreground hover:text-primary transition" />
+              <ShoppingCart size={20} className="text-foreground hover:text-primary transition" />
               {cartItems.length > 0 && (
                 <span className="absolute -top-2 -right-2 bg-secondary text-secondary-foreground text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold">
                   {cartItems.length}
@@ -94,7 +94,7 @@ export default function Navigation() {
 
             {/* Mobile Menu Button */}
             <button onClick={() => setMobileOpen(!mobileOpen)} className="md:hidden text-foreground">
-              {mobileOpen ? <FaTimes size={24} /> : <FaBars size={24} />}
+              {mobileOpen ? <X size={24} /> : <Menu size={24} />}
             </button>
           </div>
         </div>

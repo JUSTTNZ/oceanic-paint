@@ -11,7 +11,7 @@ const _inter = Inter({ subsets: ["latin"] })
 const _grotesk = Grotesk({ subsets: ["latin"], variable: "--font-grotesk" })
 
 export const metadata: Metadata = {
-  title: "Oceanic Paint - Premium Paint Products",
+  title: "Evans Paints - Premium Paint Products",
   description: "High-quality paint products for interior, exterior, and specialized finishes",
   generator: "v0.app",
   icons: {

@@ -5,7 +5,7 @@ import type React from "react"
 import { useState } from "react"
 import Navigation from "@/components/navigation"
 import Footer from "@/components/footer"
-import { FaEnvelope, FaPhone, FaMapMarkerAlt } from "react-icons/fa"
+import { Mail, Phone, MapPin } from "lucide-react"
 
 export default function ContactPage() {
   const [submitted, setSubmitted] = useState(false)
@@ -29,16 +29,16 @@ export default function ContactPage() {
             {/* Contact Info */}
             <div className="space-y-8">
               <div className="flex gap-4">
-                <FaEnvelope size={24} className="text-primary flex-shrink-0" />
+                <Mail size={24} className="text-primary flex-shrink-0" />
                 <div>
                   <h3 className="font-bold text-foreground mb-1">Email</h3>
-                  <p className="text-muted-foreground">info@oceanicpaint.com</p>
-                  <p className="text-muted-foreground">support@oceanicpaint.com</p>
+                  <p className="text-muted-foreground">info@evanspaints.com</p>
+                  <p className="text-muted-foreground">support@evanspaints.com</p>
                 </div>
               </div>
 
               <div className="flex gap-4">
-                <FaPhone size={24} className="text-primary flex-shrink-0" />
+                <Phone size={24} className="text-primary flex-shrink-0" />
                 <div>
                   <h3 className="font-bold text-foreground mb-1">Phone</h3>
                   <p className="text-muted-foreground">+1 (234) 567-890</p>
@@ -47,7 +47,7 @@ export default function ContactPage() {
               </div>
 
               <div className="flex gap-4">
-                <FaMapMarkerAlt size={24} className="text-primary flex-shrink-0" />
+                <MapPin size={24} className="text-primary flex-shrink-0" />
                 <div>
                   <h3 className="font-bold text-foreground mb-1">Address</h3>
                   <p className="text-muted-foreground">123 Paint Street</p>

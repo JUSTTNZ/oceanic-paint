@@ -1,40 +1,100 @@
 "use client"
 
-import { useState, useMemo } from "react"
+import { useState, useMemo, useEffect } from "react"
 import Image from "next/image"
 import Link from "next/link"
-import { FaStar } from "react-icons/fa"
+import { Star } from "lucide-react"
 import Navigation from "@/components/navigation"
 import Footer from "@/components/footer"
-import { mockPaints, mockCategories, mockColors } from "@/lib/mockData"
+import { createSupabaseBrowserClient } from "@/lib/supabase/client"
 
 export default function ProductsPage() {
+  const [products, setProducts] = useState<any[]>([])
+  const [categories, setCategories] = useState<string[]>([])
+  const [colors, setColors] = useState<string[]>([])
+  const [loading, setLoading] = useState(true)
   const [selectedCategory, setSelectedCategory] = useState<string>("")
   const [selectedColor, setSelectedColor] = useState<string>("")
   const [selectedSize, setSelectedSize] = useState<string>("")
   const [sortBy, setSortBy] = useState<string>("featured")
 
+  const supabase = createSupabaseBrowserClient()
+
+  useEffect(() => {
+    fetchData()
+  }, [])
+
+  const fetchData = async () => {
+    try {
+      setLoading(true)
+      
+      // Fetch all products
+      const { data: productsData, error: productsError } = await supabase
+        .from("products")
+        .select("*")
+        .order("created_at", { ascending: false })
+      
+      if (productsError) throw productsError
+      
+      setProducts(productsData || [])
+
+      // Extract unique categories from products
+      const uniqueCategories = Array.from(
+        new Set(productsData?.map(item => item.category).filter(Boolean) || [])
+      )
+      setCategories(uniqueCategories)
+
+      // Extract unique colors from products
+      const allColors = productsData?.flatMap(product => 
+        Array.isArray(product.colors) ? product.colors : []
+      ) || []
+      const uniqueColors = Array.from(new Set(allColors)).filter(Boolean)
+      setColors(uniqueColors)
+
+    } catch (err) {
+      console.error("Error fetching data:", err)
+    } finally {
+      setLoading(false)
+    }
+  }
+
   const filteredProducts = useMemo(() => {
-    let filtered = mockPaints
+    let filtered = products
 
     if (selectedCategory) {
       filtered = filtered.filter((p) => p.category === selectedCategory)
     }
 
     if (selectedColor) {
-      filtered = filtered.filter((p) => p.colors.includes(selectedColor))
+      filtered = filtered.filter((p) => {
+        if (!p.colors || !Array.isArray(p.colors)) return false
+        return p.colors.includes(selectedColor)
+      })
     }
 
+    // Sorting
     if (sortBy === "price-low") {
-      filtered = [...filtered].sort((a, b) => a.price - b.price)
+      filtered = [...filtered].sort((a, b) => (a.price || 0) - (b.price || 0))
     } else if (sortBy === "price-high") {
-      filtered = [...filtered].sort((a, b) => b.price - a.price)
+      filtered = [...filtered].sort((a, b) => (b.price || 0) - (a.price || 0))
     } else if (sortBy === "rating") {
-      filtered = [...filtered].sort((a, b) => b.rating - a.rating)
+      filtered = [...filtered].sort((a, b) => (b.rating || 0) - (a.rating || 0))
     }
 
     return filtered
-  }, [selectedCategory, selectedColor, sortBy])
+  }, [products, selectedCategory, selectedColor, sortBy])
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex flex-col bg-background">
+        <Navigation />
+        <div className="flex-1 flex items-center justify-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+        </div>
+        <Footer />
+      </div>
+    )
+  }
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
@@ -59,7 +119,7 @@ export default function ProductsPage() {
                   >
                     All Categories
                   </button>
-                  {mockCategories.map((cat) => (
+                  {categories.map((cat) => (
                     <button
                       key={cat}
                       onClick={() => setSelectedCategory(cat)}
@@ -76,32 +136,34 @@ export default function ProductsPage() {
               </div>
 
               {/* Color Filter */}
-              <div>
-                <h3 className="font-grotesk font-bold text-foreground mb-4">Color</h3>
-                <div className="space-y-2">
-                  <button
-                    onClick={() => setSelectedColor("")}
-                    className={`w-full text-left px-4 py-2 rounded transition ${
-                      selectedColor === "" ? "bg-primary text-primary-foreground" : "hover:bg-muted text-foreground"
-                    }`}
-                  >
-                    All Colors
-                  </button>
-                  {mockColors.slice(0, 5).map((color) => (
+              {colors.length > 0 && (
+                <div>
+                  <h3 className="font-grotesk font-bold text-foreground mb-4">Color</h3>
+                  <div className="space-y-2">
                     <button
-                      key={color}
-                      onClick={() => setSelectedColor(color)}
+                      onClick={() => setSelectedColor("")}
                       className={`w-full text-left px-4 py-2 rounded transition ${
-                        selectedColor === color
-                          ? "bg-primary text-primary-foreground"
-                          : "hover:bg-muted text-foreground"
+                        selectedColor === "" ? "bg-primary text-primary-foreground" : "hover:bg-muted text-foreground"
                       }`}
                     >
-                      {color}
+                      All Colors
                     </button>
-                  ))}
+                    {colors.slice(0, 8).map((color) => (
+                      <button
+                        key={color}
+                        onClick={() => setSelectedColor(color)}
+                        className={`w-full text-left px-4 py-2 rounded transition ${
+                          selectedColor === color
+                            ? "bg-primary text-primary-foreground"
+                            : "hover:bg-muted text-foreground"
+                        }`}
+                      >
+                        {color}
+                      </button>
+                    ))}
+                  </div>
                 </div>
-              </div>
+              )}
 
               {/* Sort */}
               <div>
@@ -124,35 +186,49 @@ export default function ProductsPage() {
           <div className="md:col-span-3">
             {filteredProducts.length > 0 ? (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                {filteredProducts.map((paint) => (
+                {filteredProducts.map((product) => (
                   <Link
-                    key={paint.id}
-                    href={`/products/${paint.id}`}
+                    key={product.id}
+                    href={`/products/${product.id}`}
                     className="group bg-card border border-border rounded-lg overflow-hidden hover:shadow-lg transition"
                   >
                     <div className="relative h-48 bg-muted overflow-hidden">
-                      <Image
-                        src={paint.image || "/placeholder.svg"}
-                        alt={paint.name}
-                        fill
-                        className="object-cover group-hover:scale-105 transition"
-                      />
+                      {product.image ? (
+                        <Image
+                          src={product.image}
+                          alt={product.name}
+                          fill
+                          className="object-cover group-hover:scale-105 transition"
+                          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center bg-muted">
+                          <span className="text-muted-foreground">No image</span>
+                        </div>
+                      )}
                     </div>
                     <div className="p-4">
-                      <p className="text-xs text-primary font-medium mb-1">{paint.category}</p>
+                      <p className="text-xs text-primary font-medium mb-1">{product.category}</p>
                       <h3 className="font-grotesk font-bold text-foreground mb-2 group-hover:text-primary transition line-clamp-2">
-                        {paint.name}
+                        {product.name}
                       </h3>
                       <div className="flex items-center justify-between mb-3">
                         <span className="font-grotesk font-bold text-lg text-foreground">
-                          ${paint.price.toFixed(2)}
+                          ${(product.price || 0).toFixed(2)}
                         </span>
-                        <div className="flex items-center gap-1">
-                          <FaStar size={14} className="text-secondary fill-secondary" />
-                          <span className="text-xs text-foreground">{paint.rating}</span>
-                        </div>
+                        {product.rating && (
+                          <div className="flex items-center gap-1">
+                            <Star size={14} className="text-secondary fill-secondary" />
+                            <span className="text-xs text-foreground">{product.rating}</span>
+                          </div>
+                        )}
                       </div>
-                      <p className="text-xs text-muted-foreground line-clamp-1">{paint.colors.join(", ")}</p>
+                      {product.colors && Array.isArray(product.colors) && product.colors.length > 0 && (
+                        <p className="text-xs text-muted-foreground line-clamp-1">
+                          Colors: {product.colors.slice(0, 3).join(", ")}
+                          {product.colors.length > 3 && "..."}
+                        </p>
+                      )}
                     </div>
                   </Link>
                 ))}
@@ -160,6 +236,7 @@ export default function ProductsPage() {
             ) : (
               <div className="text-center py-12">
                 <p className="text-muted-foreground text-lg">No products found matching your filters.</p>
+                <p className="text-muted-foreground text-sm mt-2">Try selecting different filters.</p>
               </div>
             )}
           </div>

@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { FaChevronRight } from "react-icons/fa"
+import { ChevronRight } from "lucide-react"
 import { useDispatch } from "react-redux"
 import Navigation from "@/components/navigation"
 import Footer from "@/components/footer"
@@ -207,7 +207,7 @@ export default function BuildOrderPage() {
                 className="w-full py-3 bg-primary text-primary-foreground rounded font-bold hover:opacity-90 transition flex items-center justify-center gap-2"
               >
                 Add to Cart
-                <FaChevronRight size={18} />
+                <ChevronRight size={18} />
               </button>
             </div>
           </div>

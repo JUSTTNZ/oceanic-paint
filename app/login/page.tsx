@@ -1,7 +1,6 @@
 "use client"
 
 import type React from "react"
-
 import { useState } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
@@ -10,6 +9,7 @@ import Navigation from "@/components/navigation"
 import Footer from "@/components/footer"
 import { login } from "@/lib/authSlice"
 import type { AppDispatch } from "@/lib/store"
+import { createSupabaseBrowserClient } from "@/lib/supabase/client"
 
 export default function LoginPage() {
   const router = useRouter()
@@ -17,30 +17,75 @@ export default function LoginPage() {
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [error, setError] = useState("")
+  const [loading, setLoading] = useState(false)
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
     setError("")
+    setLoading(true)
 
     if (!email || !password) {
       setError("Please fill in all fields")
+      setLoading(false)
       return
     }
 
-    // Mock login logic
-    dispatch(
-      login({
-        id: "1",
-        email,
-        name: email.split("@")[0],
-        isAdmin: email === "admin@oceanicpaint.com",
-      }),
-    )
+    try {
+      // Use the API route instead of direct Supabase
+      const response = await fetch("/api/auth/signin", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          email,
+          password,
+        }),
+      })
 
-    if (email === "admin@oceanicpaint.com") {
-      router.push("/admin")
-    } else {
-      router.push("/dashboard")
+      const data = await response.json()
+      
+      console.log("Login response:", data)
+      
+      if (!response.ok) {
+        throw new Error(data.error || "Login failed")
+      }
+
+      // Get the user role
+      const userRole = data.role || "customer"
+      console.log("User role:", userRole)
+      
+      // Dispatch to Redux with correct role
+      dispatch(
+        login({
+          id: data.user.id,
+          email: data.user.email,
+          name: data.user.full_name || data.user.user_metadata?.display_name || email.split('@')[0],
+          role: userRole,
+          isAdmin: userRole === "admin",
+        })
+      )
+
+      // IMPORTANT: Also set up Supabase session client-side
+      const supabase = createSupabaseBrowserClient()
+      await supabase.auth.getSession() // This will sync the session
+
+      // REDIRECT BASED ON ROLE
+      if (userRole === "admin") {
+        console.log("Admin user detected, redirecting to admin dashboard")
+        router.push("/admin")
+      } else {
+        console.log("Regular user detected, redirecting to dashboard")
+        router.push("/dashboard")
+      }
+      
+      router.refresh()
+      
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Login failed")
+      console.error("Login error:", err)
+    } finally {
+      setLoading(false)
     }
   }
 
@@ -66,6 +111,8 @@ export default function LoginPage() {
                 onChange={(e) => setEmail(e.target.value)}
                 className="w-full px-4 py-2 border border-border rounded bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
                 placeholder="you@example.com"
+                disabled={loading}
+                required
               />
             </div>
 
@@ -77,14 +124,17 @@ export default function LoginPage() {
                 onChange={(e) => setPassword(e.target.value)}
                 className="w-full px-4 py-2 border border-border rounded bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
                 placeholder="••••••••"
+                disabled={loading}
+                required
               />
             </div>
 
             <button
               type="submit"
-              className="w-full py-2 bg-primary text-primary-foreground rounded font-bold hover:opacity-90 transition"
+              disabled={loading}
+              className="w-full py-2 bg-primary text-primary-foreground rounded font-bold hover:opacity-90 transition disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              Sign In
+              {loading ? "Signing in..." : "Sign In"}
             </button>
           </form>
 
@@ -94,13 +144,6 @@ export default function LoginPage() {
               Sign up
             </Link>
           </p>
-
-          <div className="mt-8 p-4 bg-muted/30 rounded text-sm text-muted-foreground">
-            <p className="font-bold mb-2">Demo Credentials:</p>
-            <p>User: user@example.com</p>
-            <p>Admin: admin@oceanicpaint.com</p>
-            <p>Password: any value</p>
-          </div>
         </div>
       </div>
 

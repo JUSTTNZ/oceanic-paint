@@ -3,7 +3,7 @@
 import React from "react"
 
 import Link from "next/link"
-import { FaCheckCircle, FaBox } from "react-icons/fa"
+import { CheckCircle, Package } from "lucide-react"
 import Navigation from "@/components/navigation"
 import Footer from "@/components/footer"
 import { useSelector, useDispatch } from "react-redux"
@@ -32,7 +32,7 @@ export default function OrderSuccessPage() {
           {/* Success Badge */}
           <div className="text-center mb-8">
             <div className="flex justify-center mb-6">
-              <FaCheckCircle size={80} className="text-secondary" />
+              <CheckCircle size={80} className="text-secondary" />
             </div>
             <h1 className="font-grotesk text-4xl font-bold text-foreground mb-2">Order Confirmed!</h1>
             <p className="text-lg text-muted-foreground">
@@ -105,14 +105,14 @@ export default function OrderSuccessPage() {
           {/* Next Steps */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
             <div className="bg-muted/30 p-6 rounded-lg">
-              <FaBox size={24} className="text-primary mb-3" />
+              <Package size={24} className="text-primary mb-3" />
               <h3 className="font-bold text-foreground mb-2">Track Your Order</h3>
               <p className="text-sm text-muted-foreground">
                 You'll receive a tracking email shortly with shipping updates.
               </p>
             </div>
             <div className="bg-muted/30 p-6 rounded-lg">
-              <FaCheckCircle size={24} className="text-secondary mb-3" />
+              <CheckCircle size={24} className="text-secondary mb-3" />
               <h3 className="font-bold text-foreground mb-2">View in Dashboard</h3>
               <p className="text-sm text-muted-foreground">Check your account dashboard to view all your orders.</p>
             </div>

@@ -1,14 +1,74 @@
 "use client"
 
+import { useState, useEffect } from "react"
 import Link from "next/link"
 import Image from "next/image"
-import { FaChevronRight, FaStar } from "react-icons/fa"
+import { ChevronRight, Star } from "lucide-react"
 import Navigation from "@/components/navigation"
 import Footer from "@/components/footer"
-import { mockPaints, mockCategories } from "@/lib/mockData"
+import { createSupabaseBrowserClient } from "@/lib/supabase/client"
 
 export default function Home() {
-  const featuredProducts = mockPaints.slice(0, 3)
+  const [featuredProducts, setFeaturedProducts] = useState<any[]>([])
+  const [categories, setCategories] = useState<string[]>([])
+  const [loading, setLoading] = useState(true)
+  
+  const supabase = createSupabaseBrowserClient()
+const categoryColors: Record<string, string> = {
+  "Interior": "bg-blue-100 text-blue-700",
+  "Exterior": "bg-green-100 text-green-700", 
+  "Gloss": "bg-yellow-100 text-yellow-700",
+  "Matte": "bg-purple-100 text-purple-700",
+  "Primer": "bg-gray-100 text-gray-700",
+  "Varnish": "bg-amber-100 text-amber-700",
+  "Eco-Friendly": "bg-emerald-100 text-emerald-700",
+}
+
+// Fallback for unknown categories
+const getCategoryColor = (category: string): string => {
+  return categoryColors[category] || "bg-primary/10 text-primary"
+}
+
+
+
+  useEffect(() => {
+    fetchData()
+  }, [])
+
+  const fetchData = async () => {
+    try {
+      // Fetch products (limit to 3 for featured)
+      const { data: products, error: productsError } = await supabase
+        .from("products")
+        .select("*")
+        .order("created_at", { ascending: false })
+        .limit(3)
+      
+      if (productsError) throw productsError
+      
+      setFeaturedProducts(products || [])
+
+      // Fetch distinct categories from products
+      const { data: categoriesData, error: categoriesError } = await supabase
+        .from("products")
+        .select("category")
+      
+      if (categoriesError) throw categoriesError
+      
+      // Extract unique categories
+      const uniqueCategories = Array.from(
+        new Set(categoriesData?.map(item => item.category).filter(Boolean) || [])
+      )
+      setCategories(uniqueCategories)
+
+    } catch (err) {
+      console.error("Error fetching data:", err)
+      // Fallback to mock categories if needed
+      setCategories(["Interior", "Exterior", "Gloss", "Matte", "Eco-Friendly"])
+    } finally {
+      setLoading(false)
+    }
+  }
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
@@ -22,7 +82,7 @@ export default function Home() {
               Premium Paint for Every Project
             </h1>
             <p className="text-lg text-muted-foreground mb-8">
-              Discover Oceanic Paint's collection of high-quality interior, exterior, and specialty finishes. Transform
+              Discover Evans Paints' collection of high-quality interior, exterior, and specialty finishes. Transform
               your spaces with vibrant, durable colors.
             </p>
             <div className="flex flex-col sm:flex-row gap-4">
@@ -31,7 +91,7 @@ export default function Home() {
                 className="px-6 py-3 bg-primary text-primary-foreground rounded font-medium hover:opacity-90 transition inline-flex items-center justify-center gap-2"
               >
                 Shop Now
-                <FaChevronRight size={18} />
+                <ChevronRight size={18} />
               </Link>
               <Link
                 href="/build-order"
@@ -48,20 +108,35 @@ export default function Home() {
       <section className="py-16">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <h2 className="font-grotesk text-3xl font-bold text-foreground mb-12 text-center">Shop by Category</h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4">
-            {mockCategories.map((category) => (
-              <Link
-                key={category}
-                href={`/products?category=${category}`}
-                className="p-6 border border-border rounded-lg hover:border-primary hover:shadow-md transition text-center group"
-              >
-                <div className="w-16 h-16 bg-primary/10 rounded-lg mx-auto mb-4 group-hover:bg-primary/20 transition" />
-                <h3 className="font-grotesk font-bold text-foreground group-hover:text-primary transition">
-                  {category}
-                </h3>
-              </Link>
-            ))}
-          </div>
+          {loading ? (
+            <div className="text-center py-8">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4">
+           {categories.map((category) => {
+  const colorClass = getCategoryColor(category)
+  
+  return (
+    <Link
+      key={category}
+      href={`/products?category=${category}`}
+      className="p-6 border border-border rounded-lg hover:border-primary hover:shadow-md transition text-center group"
+    >
+      <div className={`w-16 h-16 ${colorClass.split(' ')[0]} rounded-lg mx-auto mb-4 group-hover:opacity-80 transition flex items-center justify-center`}>
+        {/* Optional: Add an icon or first letter */}
+        <span className={`text-lg font-bold ${colorClass.split(' ')[1]}`}>
+          {category.charAt(0)}
+        </span>
+      </div>
+      <h3 className="font-grotesk font-bold text-foreground group-hover:text-primary transition">
+        {category}
+      </h3>
+    </Link>
+  )
+})}
+            </div>
+          )}
         </div>
       </section>
 
@@ -69,38 +144,68 @@ export default function Home() {
       <section className="py-16 bg-muted/30">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <h2 className="font-grotesk text-3xl font-bold text-foreground mb-12 text-center">Featured Products</h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {featuredProducts.map((paint) => (
+          {loading ? (
+            <div className="text-center py-12">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
+              <p className="mt-4 text-muted-foreground">Loading products...</p>
+            </div>
+          ) : featuredProducts.length === 0 ? (
+            <div className="text-center py-12">
+              <p className="text-muted-foreground">No products found</p>
               <Link
-                key={paint.id}
-                href={`/products/${paint.id}`}
-                className="group bg-card border border-border rounded-lg overflow-hidden hover:shadow-lg transition"
+                href="/admin/products"
+                className="mt-4 inline-block px-6 py-2 bg-primary text-primary-foreground rounded font-medium hover:opacity-90 transition"
               >
-                <div className="relative h-48 bg-muted overflow-hidden">
-                  <Image
-                    src={paint.image || "/placeholder.svg"}
-                    alt={paint.name}
-                    fill
-                    className="object-cover group-hover:scale-105 transition"
-                  />
-                </div>
-                <div className="p-6">
-                  <p className="text-sm text-primary font-medium mb-2">{paint.category}</p>
-                  <h3 className="font-grotesk font-bold text-lg text-foreground mb-2 group-hover:text-primary transition">
-                    {paint.name}
-                  </h3>
-                  <p className="text-sm text-muted-foreground mb-4 line-clamp-2">{paint.description}</p>
-                  <div className="flex items-center justify-between">
-                    <span className="font-grotesk text-xl font-bold text-foreground">${paint.price.toFixed(2)}</span>
-                    <div className="flex items-center gap-1">
-                      <FaStar size={16} className="text-secondary fill-secondary" />
-                      <span className="text-sm text-foreground">{paint.rating}</span>
+                Add Products
+              </Link>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+              {featuredProducts.map((product) => (
+                <Link
+                  key={product.id}
+                  href={`/products/${product.id}`}
+                  className="group bg-card border border-border rounded-lg overflow-hidden hover:shadow-lg transition"
+                >
+                  <div className="relative h-48 bg-muted overflow-hidden">
+                    {product.image ? (
+                      <Image
+                        src={product.image}
+                        alt={product.name}
+                        fill
+                        className="object-cover group-hover:scale-105 transition"
+                        sizes="(max-width: 768px) 100vw, 33vw"
+                      />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center bg-muted">
+                        <span className="text-muted-foreground">No image</span>
+                      </div>
+                    )}
+                  </div>
+                  <div className="p-6">
+                    <p className="text-sm text-primary font-medium mb-2">{product.category}</p>
+                    <h3 className="font-grotesk font-bold text-lg text-foreground mb-2 group-hover:text-primary transition">
+                      {product.name}
+                    </h3>
+                    <p className="text-sm text-muted-foreground mb-4 line-clamp-2">
+                      {product.description || "No description available"}
+                    </p>
+                    <div className="flex items-center justify-between">
+                      <span className="font-grotesk text-xl font-bold text-foreground">
+                        ${product.price?.toFixed(2) || "0.00"}
+                      </span>
+                      {product.rating && (
+                        <div className="flex items-center gap-1">
+                          <Star size={16} className="text-secondary fill-secondary" />
+                          <span className="text-sm text-foreground">{product.rating}</span>
+                        </div>
+                      )}
                     </div>
                   </div>
-                </div>
-              </Link>
-            ))}
-          </div>
+                </Link>
+              ))}
+            </div>
+          )}
         </div>
       </section>
 

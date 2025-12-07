@@ -1,5 +1,5 @@
 import Link from "next/link"
-import { FaEnvelope, FaPhone, FaMapMarkerAlt } from "react-icons/fa"
+import { Mail, Phone, MapPin } from "lucide-react"
 
 export default function Footer() {
   return (
@@ -12,7 +12,7 @@ export default function Footer() {
               <div className="bg-primary p-2 rounded">
                 <span className="font-grotesk text-lg font-bold text-primary-foreground">OP</span>
               </div>
-              <span className="font-grotesk font-bold text-foreground">Oceanic Paint</span>
+              <span className="font-grotesk font-bold text-foreground">Oceanic Paints</span>
             </div>
             <p className="text-muted-foreground text-sm">Premium paint products for every project.</p>
           </div>
@@ -71,19 +71,19 @@ export default function Footer() {
             <h3 className="font-grotesk font-bold text-foreground mb-4">Contact</h3>
             <div className="space-y-3 text-sm text-muted-foreground">
               <div className="flex items-center gap-2">
-                <FaEnvelope size={16} />
-                <a href="mailto:info@oceanicpaint.com" className="hover:text-primary transition">
-                  info@oceanicpaint.com
+                <Mail size={16} />
+                <a href="mailto:info@evanspaints.com" className="hover:text-primary transition">
+                  info@oceanicpaints.com
                 </a>
               </div>
               <div className="flex items-center gap-2">
-                <FaPhone size={16} />
+                <Phone size={16} />
                 <a href="tel:+1234567890" className="hover:text-primary transition">
                   +1 (234) 567-890
                 </a>
               </div>
               <div className="flex items-center gap-2">
-                <FaMapMarkerAlt size={16} />
+                <MapPin size={16} />
                 <span>123 Paint Street, Art City</span>
               </div>
             </div>
@@ -91,7 +91,7 @@ export default function Footer() {
         </div>
 
         <div className="border-t border-border mt-8 pt-8 text-center text-sm text-muted-foreground">
-          <p>&copy; 2025 Oceanic Paint. All rights reserved.</p>
+          <p>&copy; 2025 oceanic Paints. All rights reserved.</p>
         </div>
       </div>
     </footer>

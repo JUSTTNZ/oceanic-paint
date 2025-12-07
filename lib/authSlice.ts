@@ -4,7 +4,8 @@ interface User {
   id: string
   email: string
   name: string
-  isAdmin: boolean
+  role: string  // ADD THIS: "customer", "admin", "staff", etc.
+  isAdmin: boolean // KEEP THIS for backward compatibility
 }
 
 interface AuthState {

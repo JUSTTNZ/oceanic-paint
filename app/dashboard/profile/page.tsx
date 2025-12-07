@@ -4,7 +4,7 @@ import type React from "react"
 
 import { useState } from "react"
 import Link from "next/link"
-import { FaChevronLeft } from "react-icons/fa"
+import { ChevronLeft } from "lucide-react"
 import { useSelector } from "react-redux"
 import { useRouter } from "next/navigation"
 import { useEffect } from "react"
@@ -43,7 +43,7 @@ export default function ProfilePage() {
 
       <div className="mx-auto max-w-2xl px-4 sm:px-6 lg:px-8 py-8 flex-1">
         <Link href="/dashboard" className="inline-flex items-center gap-2 text-primary hover:underline mb-8">
-          <FaChevronLeft size={18} />
+          <ChevronLeft size={18} />
           Back to Dashboard
         </Link>
 
