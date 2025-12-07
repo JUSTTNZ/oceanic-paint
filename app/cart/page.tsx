@@ -113,7 +113,7 @@ export default function CartPage() {
         )}
 
         {/* User Status */}
-        {user ? (
+        {/* {user ? (
           <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg flex items-center justify-between">
             <div className="flex items-center gap-3">
               <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
@@ -158,7 +158,7 @@ export default function CartPage() {
               </button>
             </div>
           </div>
-        )}
+        )} */}
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Cart Items */}

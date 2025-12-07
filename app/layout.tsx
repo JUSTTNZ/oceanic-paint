@@ -1,17 +1,20 @@
-import type React from "react"
 import type { Metadata } from "next"
-import { Geist, Geist_Mono, Inter, Host_Grotesk as Grotesk } from "next/font/google"
+import { Space_Grotesk } from "next/font/google"
 import { Analytics } from "@vercel/analytics/next"
 import "./globals.css"
 import { Providers } from "./providers"
 
-const _geist = Geist({ subsets: ["latin"] })
-const _geistMono = Geist_Mono({ subsets: ["latin"] })
-const _inter = Inter({ subsets: ["latin"] })
-const _grotesk = Grotesk({ subsets: ["latin"], variable: "--font-grotesk" })
+// Initialize Space Grotesk font
+const spaceGrotesk = Space_Grotesk({
+  subsets: ["latin"],
+  variable: "--font-space-grotesk",
+  display: "swap",
+  // Optional: Adjust weight ranges if needed
+  weight: ["300", "400", "500", "600", "700"],
+})
 
 export const metadata: Metadata = {
-  title: "Evans Paints - Premium Paint Products",
+  title: "Oceanic Paints - Premium Paint Products",
   description: "High-quality paint products for interior, exterior, and specialized finishes",
   generator: "v0.app",
   icons: {
@@ -39,8 +42,8 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="en">
-      <body className={`font-sans antialiased ${_grotesk.variable}`}>
+    <html lang="en" className={`${spaceGrotesk.variable}`}>
+      <body className={`${spaceGrotesk.className} font-sans antialiased`}>
         <Providers>{children}</Providers>
         <Analytics />
       </body>

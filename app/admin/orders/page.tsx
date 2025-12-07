@@ -9,6 +9,11 @@ import Navigation from "@/components/navigation"
 import Footer from "@/components/footer"
 import type { RootState } from "@/lib/store"
 import { createSupabaseBrowserClient } from "@/lib/supabase/client"
+interface UserProfile {
+  id: string
+  email: string
+  full_name: string
+}
 
 interface Order {
   id: string
@@ -64,7 +69,7 @@ export default function OrdersManagementPage() {
     // Get user profiles for all unique user IDs
     const userIds = [...new Set(ordersData?.map(order => order.user_id).filter(Boolean) || [])]
     
-    let userProfiles = {}
+  let userProfiles: Record<string, UserProfile> = {}
     
     if (userIds.length > 0) {
       // Get user profiles by IDs
@@ -75,8 +80,8 @@ export default function OrdersManagementPage() {
       
       if (!profilesError && profilesData) {
         // Create a map of user_id -> profile
-        userProfiles = profilesData.reduce((acc, profile) => {
-          acc[profile.id] = profile
+      userProfiles = profilesData.reduce((acc: Record<string, UserProfile>, profile: UserProfile) => {
+      acc[profile.id] = profile
           return acc
         }, {})
       }

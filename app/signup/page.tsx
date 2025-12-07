@@ -103,7 +103,7 @@ console.log("Signup response data:", data)
       <div className="flex-1 flex items-center justify-center px-4 py-12">
         <div className="w-full max-w-md">
           <div className="text-center mb-8">
-            <h1 className="font-grotesk text-3xl font-bold text-foreground mb-2">Join Evans Paints</h1>
+            <h1 className="font-grotesk text-3xl font-bold text-foreground mb-2">Join oceanic Paints</h1>
             <p className="text-muted-foreground">Create your account to get started</p>
           </div>
 

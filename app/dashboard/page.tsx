@@ -69,7 +69,7 @@ export default function DashboardPage() {
             created_at,
             order_items (id)
           `)
-          .eq("user_id", user.id)
+          .eq("user_id", user?.id)
           .order("created_at", { ascending: false })
           .limit(10),
 
@@ -77,7 +77,7 @@ export default function DashboardPage() {
         supabase
           .from("user_profiles")
           .select("*")
-          .eq("id", user.id)
+          .eq("id", user?.id)
           .single()
       ])
 
@@ -105,8 +105,8 @@ export default function DashboardPage() {
       } else {
         // Create fallback profile from auth user
         setUserProfile({
-          full_name: user.name || "User",
-          email: user.email,
+          full_name: user?.name || "User",
+          email: user?.email,
           loyalty_points: 0
         })
       }
