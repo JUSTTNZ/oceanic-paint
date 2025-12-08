@@ -7,6 +7,7 @@ import Navigation from "@/components/navigation"
 import Footer from "@/components/footer"
 import { useSelector } from "react-redux"
 import type { RootState } from "@/lib/store"
+import { formatPrice } from "@/components/formatprice"
 
 export default function CheckoutPage() {
   const [step, setStep] = useState<"shipping" | "payment" | "review">("shipping")
@@ -128,7 +129,7 @@ export default function CheckoutPage() {
     <div className="min-h-screen flex flex-col bg-background">
       <Navigation />
 
-      <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8 py-8 flex-1">
+      <div className="px-4 sm:px-6 lg:px-12 py-8 flex-1">
         <Link href="/cart" className="inline-flex items-center gap-2 text-primary hover:underline mb-8">
           <ChevronLeft size={18} />
           Back to Cart
@@ -326,7 +327,7 @@ export default function CheckoutPage() {
                               {item.color && <span className="text-muted-foreground"> • {item.color}</span>}
                               {item.size && <span className="text-muted-foreground"> • {item.size}</span>}
                             </span>
-                            <span>${(item.price * item.quantity).toFixed(2)}</span>
+                            <span>{formatPrice(item.price * item.quantity)}</span>
                           </div>
                         ))}
                       </div>
@@ -381,42 +382,40 @@ export default function CheckoutPage() {
           </div>
 
           {/* Order Summary Sidebar */}
-          <div className="lg:col-span-1">
-            <div className="border border-border rounded-lg p-6 bg-card sticky top-20">
-              <h2 className="font-grotesk font-bold text-xl text-foreground mb-6">Order Summary</h2>
-              <div className="space-y-3 mb-6 max-h-64 overflow-y-auto">
-                {cartItems.map((item) => (
-                  <div key={item.id} className="flex justify-between text-sm text-foreground">
-                    <span className="truncate max-w-[120px]">
-                      {item.name} ({item.quantity}x)
-                    </span>
-                    <span className="flex-shrink-0">${(item.price * item.quantity).toFixed(2)}</span>
-                  </div>
-                ))}
-              </div>
-              <div className="border-t border-border pt-4 space-y-2">
-                <div className="flex justify-between text-foreground">
-                  <span>Subtotal</span>
-                  <span>${subtotal.toFixed(2)}</span>
-                </div>
-                <div className="flex justify-between text-foreground">
-                  <span>Tax (10%)</span>
-                  <span>${tax.toFixed(2)}</span>
-                </div>
-                <div className="flex justify-between text-foreground">
-                  <span>Shipping</span>
-                  <span>Free</span>
-                </div>
-                <div className="flex justify-between font-grotesk font-bold text-lg text-foreground pt-4 border-t border-border">
-                  <span>Total</span>
-                  <span>${total.toFixed(2)}</span>
-                </div>
-                <div className="text-xs text-muted-foreground pt-2">
-                  Amount in NGN: ₦{(total * 1500).toFixed(2)}
-                </div>
-              </div>
-            </div>
-          </div>
+      <div className="lg:col-span-1">
+  <div className="border border-border rounded-lg p-6 bg-card sticky top-20">
+    <h2 className="font-grotesk font-bold text-xl text-foreground mb-6">Order Summary</h2>
+    <div className="space-y-3 mb-6 max-h-64 overflow-y-auto">
+      {cartItems.map((item) => (
+        <div key={item.id} className="flex justify-between text-sm text-foreground">
+          <span className="truncate max-w-[120px]">
+            {item.name} ({item.quantity}x)
+          </span>
+          <span className="flex-shrink-0">{formatPrice(item.price * item.quantity)}</span>
+        </div>
+      ))}
+    </div>
+    <div className="border-t border-border pt-4 space-y-2">
+      <div className="flex justify-between text-foreground">
+        <span>Subtotal</span>
+        <span>{formatPrice(subtotal)}</span>
+      </div>
+      <div className="flex justify-between text-foreground">
+        <span>Tax (10%)</span>
+        <span>{formatPrice(tax)}</span>
+      </div>
+      <div className="flex justify-between text-foreground">
+        <span>Shipping</span>
+        <span>Free</span>
+      </div>
+      <div className="flex justify-between font-grotesk font-bold text-lg text-foreground pt-4 border-t border-border">
+        <span>Total</span>
+        <span>{formatPrice(total)}</span>
+      </div>
+    </div>
+  </div>
+</div>
+
         </div>
       </div>
 

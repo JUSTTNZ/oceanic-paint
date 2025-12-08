@@ -1,14 +1,14 @@
 import { createSlice, type PayloadAction } from "@reduxjs/toolkit"
 
-interface User {
+export interface User {
   id: string
   email: string
   name: string
-  role: string  // ADD THIS: "customer", "admin", "staff", etc.
-  isAdmin: boolean // KEEP THIS for backward compatibility
+  role: string       // "customer", "admin", "staff", etc.
+  isAdmin: boolean   // backward compatibility
 }
 
-interface AuthState {
+export interface AuthState {
   user: User | null
   isAuthenticated: boolean
 }
@@ -30,8 +30,13 @@ const authSlice = createSlice({
       state.user = null
       state.isAuthenticated = false
     },
+    // new: restore from persisted state or Supabase session
+    setUser: (state, action: PayloadAction<User | null>) => {
+      state.user = action.payload
+      state.isAuthenticated = !!action.payload
+    },
   },
 })
 
-export const { login, logout } = authSlice.actions
+export const { login, logout, setUser } = authSlice.actions
 export default authSlice.reducer
