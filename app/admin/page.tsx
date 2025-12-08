@@ -10,7 +10,7 @@ import Footer from "@/components/footer"
 import { logout } from "@/lib/authSlice"
 import type { RootState, AppDispatch } from "@/lib/store"
 import { createSupabaseBrowserClient } from "@/lib/supabase/client"
-
+import { formatPrice } from "@/components/formatprice"
 interface StatCard {
   title: string
   value: string | number
@@ -103,7 +103,7 @@ export default function AdminDashboard() {
         },
         {
           title: "Total Revenue",
-          value: `$${totalRevenue.toFixed(2)}`,
+            value: `${formatPrice(totalRevenue)}`,
           icon: <TrendingUp size={24} />,
           color: "text-green-600"
         },
@@ -148,7 +148,7 @@ export default function AdminDashboard() {
         },
         {
           title: "Total Revenue",
-          value: "$0.00",
+          value: "0.00",
           icon: <TrendingUp size={24} />,
           color: "text-green-600"
         },
@@ -193,7 +193,7 @@ export default function AdminDashboard() {
     <div className="min-h-screen flex flex-col bg-background">
       <Navigation />
 
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8 flex-1">
+      <div className=" px-4 sm:px-6 lg:px-12 py-8 flex-1">
         <div className="mb-8">
           <h1 className="font-grotesk text-3xl font-bold text-foreground">Admin Dashboard</h1>
           <p className="text-muted-foreground">Welcome back, {user.name || user.email}!</p>
@@ -329,7 +329,8 @@ export default function AdminDashboard() {
                         {order.order_items_count} items
                       </td>
                       <td className="py-4 px-4 text-foreground font-bold">
-                        ${order.total_amount?.toFixed(2) || "0.00"}
+                       
+                        {formatPrice(order.total_amount || 0)}
                       </td>
                       <td className="py-4 px-4">
                         <span
@@ -347,7 +348,7 @@ export default function AdminDashboard() {
         </div>
 
         {/* Quick Actions */}
-        <div className="bg-card border border-border rounded-lg p-6 mb-8">
+        {/* <div className="bg-card border border-border rounded-lg p-6 mb-8">
           <h2 className="font-grotesk text-2xl font-bold text-foreground mb-6">Quick Actions</h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
             <Link
@@ -376,7 +377,7 @@ export default function AdminDashboard() {
               Settings
             </Link>
           </div>
-        </div>
+        </div> */}
 
         {/* Logout */}
         <button

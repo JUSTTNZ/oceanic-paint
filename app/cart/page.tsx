@@ -10,6 +10,7 @@ import Navigation from "@/components/navigation"
 import Footer from "@/components/footer"
 import { removeFromCart, updateCartItem } from "@/lib/cartSlice"
 import type { RootState, AppDispatch } from "@/lib/store"
+import { formatPrice } from "@/components/formatprice"
 
 export default function CartPage() {
   const dispatch = useDispatch<AppDispatch>()
@@ -44,7 +45,7 @@ export default function CartPage() {
     return (
       <div className="min-h-screen flex flex-col bg-background">
         <Navigation />
-        <div className="flex-1 flex flex-col items-center justify-center px-4">
+        <div className="flex-1 flex flex-col items-center justify-center ">
           <div className="text-center">
             <h1 className="font-grotesk text-4xl font-bold text-foreground mb-4">Your Cart is Empty</h1>
             <p className="text-muted-foreground text-lg mb-8">Add some beautiful paints to get started!</p>
@@ -65,7 +66,7 @@ export default function CartPage() {
     <div className="min-h-screen flex flex-col bg-background">
       <Navigation />
 
-      <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 py-8 flex-1">
+      <div className="  px-4 sm:px-6 lg:px-12 py-8 flex-1">
         <Link href="/products" className="inline-flex items-center gap-2 text-primary hover:underline mb-8">
           <ChevronLeft size={18} />
           Continue Shopping
@@ -112,53 +113,7 @@ export default function CartPage() {
           </div>
         )}
 
-        {/* User Status */}
-        {/* {user ? (
-          <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
-                <span className="text-green-600 font-bold text-sm">
-                  {user.email?.charAt(0).toUpperCase() || user.name?.charAt(0) || "U"}
-                </span>
-              </div>
-              <div>
-                <p className="text-sm font-medium text-green-800">Logged in as {user.email || user.name}</p>
-                <p className="text-xs text-green-600">You can proceed to checkout</p>
-              </div>
-            </div>
-            <button
-              onClick={() => router.push("/account")}
-              className="text-sm text-green-600 hover:text-green-800 transition"
-            >
-              View Account
-            </button>
-          </div>
-        ) : (
-          <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="p-2 bg-blue-100 rounded-full">
-                <LogIn size={18} className="text-blue-600" />
-              </div>
-              <p className="text-sm text-blue-700">
-                Log in to save your cart and proceed to checkout faster.
-              </p>
-            </div>
-            <div className="flex gap-2">
-              <button
-                onClick={() => router.push("/login")}
-                className="px-4 py-2 bg-primary text-primary-foreground rounded text-sm font-medium hover:opacity-90 transition"
-              >
-                Login
-              </button>
-              <button
-                onClick={() => router.push("/register")}
-                className="px-4 py-2 border border-primary text-primary rounded text-sm font-medium hover:bg-primary/5 transition"
-              >
-                Register
-              </button>
-            </div>
-          </div>
-        )} */}
+    
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Cart Items */}
@@ -182,7 +137,7 @@ export default function CartPage() {
                   <p className="text-sm text-muted-foreground">
                     {item.color && `${item.color} • `}{item.size}
                   </p>
-                  <p className="font-grotesk font-bold text-foreground mt-2">${item.price.toFixed(2)}</p>
+                  <p className="font-grotesk font-bold text-foreground mt-2">{formatPrice(item.price)}</p>
                 </div>
 
                 <div className="flex flex-col items-end justify-between">
@@ -211,7 +166,7 @@ export default function CartPage() {
                   </div>
 
                   <div className="font-grotesk font-bold text-foreground">
-                    ${(item.price * item.quantity).toFixed(2)}
+               {formatPrice(item.price * item.quantity)}
                   </div>
                 </div>
               </div>
@@ -222,25 +177,25 @@ export default function CartPage() {
           <div className="lg:col-span-1">
             <div className="border border-border rounded-lg p-6 bg-card sticky top-20">
               <h2 className="font-grotesk font-bold text-xl text-foreground mb-6">Order Summary</h2>
+<div className="space-y-4 mb-6">
+  <div className="flex justify-between text-foreground">
+    <span>Subtotal</span>
+    <span>{formatPrice(subtotal)}</span>
+  </div>
+  <div className="flex justify-between text-foreground">
+    <span>Tax (10%)</span>
+    <span>{formatPrice(tax)}</span>
+  </div>
+  <div className="flex justify-between text-foreground">
+    <span>Shipping</span>
+    <span>Free</span>
+  </div>
+  <div className="border-t border-border pt-4 flex justify-between font-grotesk font-bold text-lg text-foreground">
+    <span>Total</span>
+    <span>{formatPrice(total)}</span>
+  </div>
+</div>
 
-              <div className="space-y-4 mb-6">
-                <div className="flex justify-between text-foreground">
-                  <span>Subtotal</span>
-                  <span>${subtotal.toFixed(2)}</span>
-                </div>
-                <div className="flex justify-between text-foreground">
-                  <span>Tax (10%)</span>
-                  <span>${tax.toFixed(2)}</span>
-                </div>
-                <div className="flex justify-between text-foreground">
-                  <span>Shipping</span>
-                  <span>Free</span>
-                </div>
-                <div className="border-t border-border pt-4 flex justify-between font-grotesk font-bold text-lg text-foreground">
-                  <span>Total</span>
-                  <span>${total.toFixed(2)}</span>
-                </div>
-              </div>
 
               {user ? (
                 <Link

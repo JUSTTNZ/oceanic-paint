@@ -10,7 +10,7 @@ export default function AboutPage() {
       <div className="flex-1">
         {/* Hero */}
         <section className="bg-primary text-primary-foreground py-16">
-          <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8 text-center">
+          <div className=" px-4 sm:px-6 lg:px-12 text-center">
             <h1 className="font-grotesk text-4xl font-bold mb-4">About Oceanic Paint</h1>
             <p className="text-lg opacity-90">Premium paint solutions for over 20 years</p>
           </div>
@@ -20,7 +20,7 @@ export default function AboutPage() {
 
         {/* Content */}
         <section className="py-16">
-          <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8 space-y-12">
+          <div className=" px-4 sm:px-6 lg:px-12 space-y-12">
             <div>
               <h2 className="font-grotesk text-3xl font-bold text-foreground mb-4">Our Story</h2>
               <p className="text-muted-foreground leading-relaxed">

@@ -7,6 +7,7 @@ import { Star } from "lucide-react"
 import Navigation from "@/components/navigation"
 import Footer from "@/components/footer"
 import { createSupabaseBrowserClient } from "@/lib/supabase/client"
+import { formatPrice } from "@/components/formatprice"
 
 export default function ProductsPage() {
   const [products, setProducts] = useState<any[]>([])
@@ -214,7 +215,8 @@ export default function ProductsPage() {
                       </h3>
                       <div className="flex items-center justify-between mb-3">
                         <span className="font-grotesk font-bold text-lg text-foreground">
-                          ${(product.price || 0).toFixed(2)}
+                           {formatPrice(product.price || 0)}
+
                         </span>
                         {product.rating && (
                           <div className="flex items-center gap-1">

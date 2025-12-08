@@ -10,16 +10,16 @@ export default function Footer() {
           <div>
             <div className="flex items-center gap-2 mb-4">
               <div className="bg-primary p-2 rounded">
-                <span className="font-grotesk text-lg font-bold text-primary-foreground">OP</span>
+                <span className=" text-lg font-bold text-primary-foreground">OP</span>
               </div>
-              <span className="font-grotesk font-bold text-foreground">Oceanic Paints</span>
+              <span className="font-bold text-foreground">Oceanic Paints</span>
             </div>
             <p className="text-muted-foreground text-sm">Premium paint products for every project.</p>
           </div>
 
           {/* Quick Links */}
           <div>
-            <h3 className="font-grotesk font-bold text-foreground mb-4">Shop</h3>
+            <h3 className="font font-bold text-foreground mb-4">Shop</h3>
             <ul className="space-y-2 text-sm text-muted-foreground">
               <li>
                 <Link href="/products?category=Interior" className="hover:text-primary transition">
@@ -46,7 +46,7 @@ export default function Footer() {
 
           {/* Company */}
           <div>
-            <h3 className="font-grotesk font-bold text-foreground mb-4">Company</h3>
+            <h3 className="font-g font-bold text-foreground mb-4">Company</h3>
             <ul className="space-y-2 text-sm text-muted-foreground">
               <li>
                 <Link href="/about" className="hover:text-primary transition">
@@ -68,7 +68,7 @@ export default function Footer() {
 
           {/* Contact */}
           <div>
-            <h3 className="font-grotesk font-bold text-foreground mb-4">Contact</h3>
+            <h3 className="fo font-bold text-foreground mb-4">Contact</h3>
             <div className="space-y-3 text-sm text-muted-foreground">
               <div className="flex items-center gap-2">
                 <Mail size={16} />

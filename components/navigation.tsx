@@ -26,7 +26,7 @@ export default function Navigation() {
             <div className="bg-primary p-2 rounded">
               <span className="font-grotesk text-lg font-bold text-primary-foreground">OP</span>
             </div>
-            <span className="hidden font-grotesk font-bold text-foreground sm:inline">Oceanic Paints</span>
+            <span className="hidden  font-medium text-foreground sm:inline">Oceanic Paints</span>
           </Link>
 
           {/* Desktop Links */}
@@ -62,7 +62,7 @@ export default function Navigation() {
                   className="flex items-center gap-2 text-foreground hover:text-primary transition"
                 >
                   <User size={18} />
-                  {user.name}
+                 
                 </Link>
                 <button onClick={handleLogout} className="text-foreground hover:text-primary transition">
                   <LogOut size={18} />
@@ -123,7 +123,7 @@ export default function Navigation() {
                     </Link>
                   )}
                   <Link href="/dashboard" className="px-4 py-2 text-foreground hover:bg-muted rounded">
-                    Dashboard ({user.name})
+                    Dashboard 
                   </Link>
                   <button onClick={handleLogout} className="px-4 py-2 text-foreground hover:bg-muted rounded text-left">
                     Logout
