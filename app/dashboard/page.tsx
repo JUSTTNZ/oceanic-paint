@@ -49,7 +49,6 @@ export default function DashboardPage() {
   const fetchUserData = async () => {
     try {
       const supabase = createSupabaseBrowserClient()
-    try {
       setLoading(true)
       setError("")
 
@@ -104,6 +103,7 @@ export default function DashboardPage() {
 
   const handleLogout = async () => {
     try {
+      const supabase = createSupabaseBrowserClient()
       await supabase.auth.signOut()
       dispatch(logout())
       router.push("/")
