@@ -3,15 +3,20 @@
 import Link from "next/link"
 import { ShoppingCart, Menu, X, LogOut, User } from "lucide-react"
 import { useSelector, useDispatch } from "react-redux"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { logout } from "@/lib/authSlice"
 import type { RootState } from "@/lib/store"
 
 export default function Navigation() {
   const [mobileOpen, setMobileOpen] = useState(false)
+  const [mounted, setMounted] = useState(false)
   const dispatch = useDispatch()
   const user = useSelector((state: RootState) => state.auth.user)
   const cartItems = useSelector((state: RootState) => state.cart.items)
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
 
   const handleLogout = () => {
     dispatch(logout())
@@ -47,39 +52,43 @@ export default function Navigation() {
 
           {/* Right Side */}
           <div className="flex items-center gap-4">
-            {user ? (
-              <div className="hidden md:flex items-center gap-4">
-                {user.isAdmin && (
-                  <Link
-                    href="/admin"
-                    className="px-4 py-2 bg-secondary text-secondary-foreground rounded font-medium text-sm hover:opacity-90 transition"
-                  >
-                    Admin
-                  </Link>
+            {mounted && (
+              <>
+                {user ? (
+                  <div className="hidden md:flex items-center gap-4">
+                    {user.isAdmin && (
+                      <Link
+                        href="/admin"
+                        className="px-4 py-2 bg-secondary text-secondary-foreground rounded font-medium text-sm hover:opacity-90 transition"
+                      >
+                        Admin
+                      </Link>
+                    )}
+                    <Link
+                      href="/dashboard"
+                      className="flex items-center gap-2 text-foreground hover:text-primary transition"
+                    >
+                      <User size={18} />
+                     
+                    </Link>
+                    <button onClick={handleLogout} className="text-foreground hover:text-primary transition">
+                      <LogOut size={18} />
+                    </button>
+                  </div>
+                ) : (
+                  <div className="hidden md:flex items-center gap-4">
+                    <Link href="/login" className="text-foreground hover:text-primary transition font-medium">
+                      Login
+                    </Link>
+                    <Link
+                      href="/signup"
+                      className="px-4 py-2 bg-primary text-primary-foreground rounded font-medium text-sm hover:opacity-90 transition"
+                    >
+                      Sign Up
+                    </Link>
+                  </div>
                 )}
-                <Link
-                  href="/dashboard"
-                  className="flex items-center gap-2 text-foreground hover:text-primary transition"
-                >
-                  <User size={18} />
-                 
-                </Link>
-                <button onClick={handleLogout} className="text-foreground hover:text-primary transition">
-                  <LogOut size={18} />
-                </button>
-              </div>
-            ) : (
-              <div className="hidden md:flex items-center gap-4">
-                <Link href="/login" className="text-foreground hover:text-primary transition font-medium">
-                  Login
-                </Link>
-                <Link
-                  href="/signup"
-                  className="px-4 py-2 bg-primary text-primary-foreground rounded font-medium text-sm hover:opacity-90 transition"
-                >
-                  Sign Up
-                </Link>
-              </div>
+              </>
             )}
 
             {/* Cart Icon */}
@@ -100,7 +109,7 @@ export default function Navigation() {
         </div>
 
         {/* Mobile Menu */}
-        {mobileOpen && (
+        {mobileOpen && mounted && (
           <div className="border-t border-border md:hidden pb-4">
             <div className="flex flex-col gap-3 pt-4">
               <Link href="/products" className="px-4 py-2 text-foreground hover:bg-muted rounded">
