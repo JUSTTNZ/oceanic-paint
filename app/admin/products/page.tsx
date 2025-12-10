@@ -84,6 +84,7 @@ export default function ProductsManagementPage() {
 
   const uploadImage = async (file: File): Promise<string | null> => {
     try {
+      const supabase = createSupabaseBrowserClient()
       const fileExt = file.name.split('.').pop()
       const fileName = `${Date.now()}-${Math.random().toString(36).substring(2, 15)}.${fileExt}`
       const filePath = `products/${fileName}`
@@ -182,6 +183,7 @@ export default function ProductsManagementPage() {
     if (!confirm("Are you sure you want to delete this product?")) return
 
     try {
+      const supabase = createSupabaseBrowserClient()
       const { error } = await supabase.from("products").delete().eq("id", id)
       if (error) {
         setError(error.message)

@@ -110,6 +110,7 @@ export default function OrdersManagementPage() {
 
   const updateOrderStatus = async (orderId: string, newStatus: string) => {
     try {
+      const supabase = createSupabaseBrowserClient()
       const { error } = await supabase
         .from("orders")
         .update({ status: newStatus })
