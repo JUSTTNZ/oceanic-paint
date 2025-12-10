@@ -18,24 +18,28 @@ export function Providers({ children }: { children: React.ReactNode }) {
 // Component to restore user session on app load
 function AuthLoader({ children }: { children: React.ReactNode }) {
   const dispatch = useDispatch()
-  const supabase = createSupabaseBrowserClient()
 
   useEffect(() => {
     const restoreUser = async () => {
-      const { data: { session } } = await supabase.auth.getSession()
-      if (session?.user) {
-        dispatch(setUser({
-          id: session.user.id,
-          email: session.user.email || "",
-          name: session.user.user_metadata?.full_name || session.user.email || "User",
-          role: session.user.user_metadata?.role || "customer",
-          isAdmin: session.user.user_metadata?.isAdmin || false,
-        }))
+      try {
+        const supabase = createSupabaseBrowserClient()
+        const { data: { session } } = await supabase.auth.getSession()
+        if (session?.user) {
+          dispatch(setUser({
+            id: session.user.id,
+            email: session.user.email || "",
+            name: session.user.user_metadata?.full_name || session.user.email || "User",
+            role: session.user.user_metadata?.role || "customer",
+            isAdmin: session.user.user_metadata?.isAdmin || false,
+          }))
+        }
+      } catch (error) {
+        console.error("Failed to restore user session:", error)
       }
     }
 
     restoreUser()
-  }, [dispatch, supabase])
+  }, [dispatch])
 
   return <>{children}</>
 }
