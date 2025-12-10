@@ -31,7 +31,6 @@ export default function AdminDashboard() {
   const router = useRouter()
   const dispatch = useDispatch<AppDispatch>()
   const user = useSelector((state: RootState) => state.auth.user)
-  const supabase = createSupabaseBrowserClient()
   
   const [stats, setStats] = useState<StatCard[]>([])
   const [recentOrders, setRecentOrders] = useState<RecentOrder[]>([])
@@ -54,6 +53,8 @@ export default function AdminDashboard() {
     try {
       setLoading(true)
       setError("")
+
+      const supabase = createSupabaseBrowserClient()
 
       // Fetch all data in parallel
       const [productsResult, ordersResult, revenueResult, usersResult, recentOrdersResult] = await Promise.all([

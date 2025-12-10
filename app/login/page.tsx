@@ -67,8 +67,12 @@ export default function LoginPage() {
       )
 
       // IMPORTANT: Also set up Supabase session client-side
-      const supabase = createSupabaseBrowserClient()
-      await supabase.auth.getSession() // This will sync the session
+      try {
+        const supabase = createSupabaseBrowserClient()
+        await supabase.auth.getSession() // This will sync the session
+      } catch (error) {
+        console.error("Failed to sync session:", error)
+      }
 
       // REDIRECT BASED ON ROLE
       if (userRole === "admin") {

@@ -19,8 +19,6 @@ export default function ProductsPage() {
   const [selectedSize, setSelectedSize] = useState<string>("")
   const [sortBy, setSortBy] = useState<string>("featured")
 
-  const supabase = createSupabaseBrowserClient()
-
   useEffect(() => {
     fetchData()
   }, [])
@@ -28,6 +26,8 @@ export default function ProductsPage() {
   const fetchData = async () => {
     try {
       setLoading(true)
+      
+      const supabase = createSupabaseBrowserClient()
       
       // Fetch all products
       const { data: productsData, error: productsError } = await supabase

@@ -13,8 +13,6 @@ export default function Home() {
   const [categories, setCategories] = useState<string[]>([])
   const [loading, setLoading] = useState(true)
 
-  const supabase = createSupabaseBrowserClient()
-
   const categoryColors: Record<string, string> = {
     "Interior": "bg-blue-100 text-blue-700",
     "Exterior": "bg-green-100 text-green-700",
@@ -35,6 +33,8 @@ export default function Home() {
 
   const fetchData = async () => {
     try {
+      const supabase = createSupabaseBrowserClient()
+      
       const { data: products, error: productsError } = await supabase
         .from("products")
         .select("*")

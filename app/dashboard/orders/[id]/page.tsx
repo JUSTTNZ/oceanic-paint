@@ -28,7 +28,6 @@ interface Order {
 export default function OrderDetailsPage() {
   const { id } = useParams()
   const router = useRouter()
-  const supabase = createSupabaseBrowserClient()
 
   const [order, setOrder] = useState<Order | null>(null)
   const [loading, setLoading] = useState(true)
@@ -42,6 +41,8 @@ export default function OrderDetailsPage() {
     try {
       setLoading(true)
       setError("")
+
+      const supabase = createSupabaseBrowserClient()
 
       const { data, error } = await supabase
         .from("orders")

@@ -15,7 +15,6 @@ import { formatPrice } from "@/components/formatprice"
 export default function ProductsManagementPage() {
   const router = useRouter()
   const user = useSelector((state: RootState) => state.auth.user)
-  const supabase = createSupabaseBrowserClient()
 
   const [products, setProducts] = useState<any[]>([])
   const [showForm, setShowForm] = useState(false)
@@ -50,6 +49,7 @@ export default function ProductsManagementPage() {
 
   const fetchProducts = async () => {
     try {
+      const supabase = createSupabaseBrowserClient()
       const { data, error } = await supabase
         .from("products")
         .select("*")

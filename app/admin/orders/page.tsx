@@ -31,7 +31,6 @@ interface Order {
 export default function OrdersManagementPage() {
   const router = useRouter()
   const user = useSelector((state: RootState) => state.auth.user)
-  const supabase = createSupabaseBrowserClient()
   
   const [orders, setOrders] = useState<Order[]>([])
   const [loading, setLoading] = useState(true)
@@ -54,6 +53,8 @@ export default function OrdersManagementPage() {
   try {
     setLoading(true)
     setError("")
+    
+    const supabase = createSupabaseBrowserClient()
     
     // Get all orders with user data
     const { data: ordersData, error: ordersError } = await supabase

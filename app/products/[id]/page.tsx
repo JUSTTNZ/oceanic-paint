@@ -17,7 +17,6 @@ export default function ProductDetail() {
   const productId = params.id as string
   
   const dispatch = useDispatch<AppDispatch>()
-  const supabase = createSupabaseBrowserClient()
   
   const [product, setProduct] = useState<any>(null)
   const [loading, setLoading] = useState(true)
@@ -32,6 +31,8 @@ export default function ProductDetail() {
 
   const fetchProduct = async () => {
     try {
+      const supabase = createSupabaseBrowserClient()
+      
       const { data, error } = await supabase
         .from("products")
         .select("*")

@@ -32,7 +32,6 @@ export default function DashboardPage() {
   const router = useRouter()
   const dispatch = useDispatch<AppDispatch>()
   const user = useSelector((state: RootState) => state.auth.user)
-  const supabase = createSupabaseBrowserClient()
   
   const [orders, setOrders] = useState<Order[]>([])
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null)
@@ -48,6 +47,8 @@ export default function DashboardPage() {
   }, [user])
 
   const fetchUserData = async () => {
+    try {
+      const supabase = createSupabaseBrowserClient()
     try {
       setLoading(true)
       setError("")
