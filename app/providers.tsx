@@ -3,6 +3,7 @@
 import type React from "react"
 import { useEffect } from "react"
 import { Provider, useDispatch } from "react-redux"
+import { Toaster } from "sonner"
 import { store } from "@/lib/store"
 import { setUser } from "@/lib/authSlice"
 import { createSupabaseBrowserClient } from "@/lib/supabase/client"
@@ -11,6 +12,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
   return (
     <Provider store={store}>
       <AuthLoader>{children}</AuthLoader>
+      <Toaster position="top-right" richColors />
     </Provider>
   )
 }

@@ -5,6 +5,7 @@ import { useState } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { useDispatch } from "react-redux"
+import { toast } from "sonner"
 import Navigation from "@/components/navigation"
 import Footer from "@/components/footer"
 import { login } from "@/lib/authSlice"
@@ -25,7 +26,7 @@ export default function LoginPage() {
     setLoading(true)
 
     if (!email || !password) {
-      setError("Please fill in all fields")
+      toast.error("Please fill in all fields")
       setLoading(false)
       return
     }
@@ -74,6 +75,8 @@ export default function LoginPage() {
         console.error("Failed to sync session:", error)
       }
 
+      toast.success("Login successful!")
+
       // REDIRECT BASED ON ROLE
       if (userRole === "admin") {
         console.log("Admin user detected, redirecting to admin dashboard")
@@ -86,7 +89,9 @@ export default function LoginPage() {
       router.refresh()
       
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Login failed")
+      const errorMessage = err instanceof Error ? err.message : "Login failed"
+      setError(errorMessage)
+      toast.error(errorMessage)
       console.error("Login error:", err)
     } finally {
       setLoading(false)

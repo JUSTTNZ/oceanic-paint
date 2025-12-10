@@ -5,6 +5,7 @@ import { useSelector, useDispatch } from "react-redux"
 import { useRouter } from "next/navigation"
 import { useEffect, useState } from "react"
 import { Package, User, LogOut, Loader2, ShoppingBag } from "lucide-react"
+import { toast } from "sonner"
 import Navigation from "@/components/navigation"
 import Footer from "@/components/footer"
 import { logout } from "@/lib/authSlice"
@@ -95,7 +96,9 @@ export default function DashboardPage() {
 
     } catch (err) {
       console.error(err)
-      setError("Failed to load your data")
+      const errorMsg = "Failed to load your data"
+      setError(errorMsg)
+      toast.error(errorMsg)
     } finally {
       setLoading(false)
     }
@@ -106,9 +109,11 @@ export default function DashboardPage() {
       const supabase = createSupabaseBrowserClient()
       await supabase.auth.signOut()
       dispatch(logout())
+      toast.success("Logged out successfully!")
       router.push("/")
     } catch (err) {
       console.error(err)
+      toast.error("Failed to logout")
     }
   }
 

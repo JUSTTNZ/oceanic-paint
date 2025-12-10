@@ -5,6 +5,7 @@ import { ChevronLeft, Eye, Loader2 } from "lucide-react"
 import { useSelector } from "react-redux"
 import { useRouter } from "next/navigation"
 import { useEffect, useState } from "react"
+import { toast } from "sonner"
 import Navigation from "@/components/navigation"
 import Footer from "@/components/footer"
 import type { RootState } from "@/lib/store"
@@ -102,7 +103,9 @@ export default function OrdersManagementPage() {
     setOrders(ordersWithUserData)
   } catch (err) {
     console.error("Error fetching orders:", err)
-    setError("Failed to load orders")
+    const errorMsg = "Failed to load orders"
+    setError(errorMsg)
+    toast.error(errorMsg)
   } finally {
     setLoading(false)
   }
@@ -122,9 +125,12 @@ export default function OrdersManagementPage() {
       setOrders(orders.map(order => 
         order.id === orderId ? { ...order, status: newStatus } : order
       ))
+      toast.success("Order status updated successfully!")
     } catch (err) {
       console.error("Error updating order:", err)
-      alert("Failed to update order status")
+      const errorMsg = "Failed to update order status"
+      toast.error(errorMsg)
+      alert(errorMsg)
     }
   }
 

@@ -4,6 +4,7 @@ import { useSelector, useDispatch } from "react-redux"
 import { useRouter } from "next/navigation"
 import { useEffect, useState } from "react"
 import { Package, ShoppingCart, Users, LogOut, Loader2, TrendingUp } from "lucide-react"
+import { toast } from "sonner"
 import Link from "next/link"
 import Navigation from "@/components/navigation"
 import Footer from "@/components/footer"
@@ -131,7 +132,9 @@ export default function AdminDashboard() {
 
     } catch (err) {
       console.error("Error fetching dashboard data:", err)
-      setError("Failed to load dashboard data")
+      const errorMsg = "Failed to load dashboard data"
+      setError(errorMsg)
+      toast.error(errorMsg)
       
       // Set fallback stats
       setStats([
@@ -170,9 +173,11 @@ export default function AdminDashboard() {
       const supabase = createSupabaseBrowserClient()
       await supabase.auth.signOut()
       dispatch(logout())
+      toast.success("Logged out successfully!")
       router.push("/")
     } catch (err) {
       console.error("Logout error:", err)
+      toast.error("Failed to logout")
     }
   }
 

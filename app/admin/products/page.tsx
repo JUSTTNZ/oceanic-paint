@@ -6,6 +6,7 @@ import Link from "next/link"
 import { ChevronLeft, Plus, Edit, Trash2, Upload } from "lucide-react"
 import { useSelector } from "react-redux"
 import { useRouter } from "next/navigation"
+import { toast } from "sonner"
 import Navigation from "@/components/navigation"
 import Footer from "@/components/footer"
 import { createSupabaseBrowserClient } from "@/lib/supabase/client"
@@ -59,7 +60,9 @@ export default function ProductsManagementPage() {
       setProducts(data || [])
     } catch (err) {
       console.error(err)
-      setError("Failed to load products")
+      const errorMsg = "Failed to load products"
+      setError(errorMsg)
+      toast.error(errorMsg)
     } finally {
       setLoading(false)
     }
@@ -71,8 +74,18 @@ export default function ProductsManagementPage() {
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (!file) return
-    if (!file.type.startsWith('image/')) return setError("Please select an image file")
-    if (file.size > 5 * 1024 * 1024) return setError("File size should be less than 5MB")
+    if (!file.type.startsWith('image/')) {
+      const msg = "Please select an image file"
+      setError(msg)
+      toast.error(msg)
+      return
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      const msg = "File size should be less than 5MB"
+      setError(msg)
+      toast.error(msg)
+      return
+    }
     
     setImageFile(file)
     setError("")
@@ -113,14 +126,18 @@ export default function ProductsManagementPage() {
     setUploading(true)
 
     if (!name || !price || !category) {
-      setError("Name, price, and category are required")
+      const msg = "Name, price, and category are required"
+      setError(msg)
+      toast.error(msg)
       setUploading(false)
       return
     }
 
     const priceNumber = parseFloat(price)
     if (isNaN(priceNumber) || priceNumber <= 0) {
-      setError("Please enter a valid price")
+      const msg = "Please enter a valid price"
+      setError(msg)
+      toast.error(msg)
       setUploading(false)
       return
     }
@@ -160,7 +177,7 @@ export default function ProductsManagementPage() {
           .select()
         if (error) throw error
         setProducts(products.map(p => p.id === editingProduct.id ? data[0] : p))
-        setError("Product updated successfully!")
+        toast.success("Product updated successfully!")
       } else {
         const { data, error } = await supabase
           .from("products")
@@ -168,13 +185,15 @@ export default function ProductsManagementPage() {
           .select()
         if (error) throw error
         setProducts([data[0], ...products])
-        setError("Product added successfully!")
+        toast.success("Product added successfully!")
       }
 
       resetForm()
     } catch (err: any) {
       console.error(err)
-      setError(err.message || "An error occurred")
+      const errorMsg = err.message || "An error occurred"
+      setError(errorMsg)
+      toast.error(errorMsg)
     } finally {
       setUploading(false)
     }
@@ -187,13 +206,16 @@ export default function ProductsManagementPage() {
       const supabase = createSupabaseBrowserClient()
       const { error } = await supabase.from("products").delete().eq("id", id)
       if (error) {
-        setError(error.message)
+        toast.error(error.message)
       } else {
         setProducts(products.filter((p) => p.id !== id))
+        toast.success("Product deleted successfully!")
       }
     } catch (err) {
       console.error(err)
-      setError("Failed to delete product")
+      const errorMsg = "Failed to delete product"
+      toast.error(errorMsg)
+      setError(errorMsg)
     }
   }
 
