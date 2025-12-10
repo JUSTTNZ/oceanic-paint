@@ -108,7 +108,6 @@ console.log("Signup response data:", data)
           </div>
 
           <form onSubmit={handleSignup} className="bg-card border border-border rounded-lg p-8 space-y-4">
-            {error && <div className="p-4 bg-destructive/10 text-destructive rounded text-sm">{error}</div>}
 
             <div>
               <label className="block text-sm font-medium text-foreground mb-2">Full Name</label>
