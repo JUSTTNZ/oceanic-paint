@@ -1,10 +1,10 @@
 import { createSupabaseServerClient } from "@/lib/supabase-server"
 import { NextResponse } from "next/server"
 
-export async function GET(request: Request, { params }: { params: { id: string } }) {
+export async function GET(request: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
     const supabase = await createSupabaseServerClient()
-    const { id } = params
+    const { id } = await params
 
     const { data: product, error } = await supabase.from("products").select("*").eq("id", id).single()
 

@@ -15,7 +15,10 @@ const nextConfig: NextConfig = {
         pathname: '/**',
       },
     ],
-  }
+  },
+  experimental: {
+    authInterrupts: true,
+  },
 };
 
 export default nextConfig;
