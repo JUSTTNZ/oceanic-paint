@@ -167,6 +167,7 @@ export default function AdminDashboard() {
 
   const handleLogout = async () => {
     try {
+      const supabase = createSupabaseBrowserClient()
       await supabase.auth.signOut()
       dispatch(logout())
       router.push("/")
