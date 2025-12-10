@@ -126,6 +126,7 @@ export default function ProductsManagementPage() {
     }
 
     try {
+      const supabase = createSupabaseBrowserClient()
       let imageUrl = imagePreview
 
       if (imageFile) {
