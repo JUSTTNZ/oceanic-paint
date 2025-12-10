@@ -7,6 +7,7 @@ import { ChevronRight, Star, Shield, Truck, Palette, CheckCircle, Sparkles } fro
 import Navigation from "@/components/navigation"
 import Footer from "@/components/footer"
 import { createSupabaseBrowserClient } from "@/lib/supabase/client"
+import { formatPrice } from "@/components/formatprice"
 
 export default function Home() {
   const [featuredProducts, setFeaturedProducts] = useState<any[]>([])
@@ -219,7 +220,7 @@ export default function Home() {
                     <p className="text-muted-foreground mb-2 line-clamp-2">
                       {product.description || "Premium quality paint for your project"}
                     </p>
-                    <span className="font-bold text-foreground">${product.price?.toFixed(2)}</span>
+                    <span className="font-bold text-foreground">{formatPrice(product.price || 0)}</span>
                   </div>
                 </Link>
               ))}

@@ -8,6 +8,7 @@ import Footer from "@/components/footer"
 import { addToCart } from "@/lib/cartSlice"
 import { mockSizes, mockColors } from "@/lib/mockData"
 import type { AppDispatch } from "@/lib/store"
+import { formatPrice } from "@/components/formatprice"
 
 export default function BuildOrderPage() {
   const dispatch = useDispatch<AppDispatch>()
@@ -194,11 +195,13 @@ export default function BuildOrderPage() {
               <div className="border-t border-border pt-4">
                 <div className="flex justify-between mb-4">
                   <span className="text-foreground">Unit Price:</span>
-                  <span className="font-grotesk font-bold">${basePrice.toFixed(2)}</span>
+                  <span className="font-grotesk font-bold">{formatPrice(basePrice || 0)}</span>
                 </div>
                 <div className="flex justify-between font-grotesk text-lg font-bold text-foreground">
                   <span>Total:</span>
-                  <span>${(basePrice * quantity).toFixed(2)}</span>
+                  <span>{formatPrice(basePrice * quantity)}</span>
+                  
+                  
                 </div>
               </div>
 
