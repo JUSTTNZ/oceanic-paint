@@ -20,15 +20,17 @@ export default function CheckoutPage() {
   const [zipCode, setZipCode] = useState("")
   const [country, setCountry] = useState("Nigeria")
   const [phone, setPhone] = useState("")
-  const [selectedChannels, setSelectedChannels] = useState<string[]>(["card"])
+  const [selectedChannels, setSelectedChannels] = useState<string[]>(["card", "bank", "ussd", "qr", "eft", "mobile_money", "barter", "bank_transfer"])
 
   const paymentChannels = [
     { id: "card", label: "Credit/Debit Card", icon: "💳" },
     { id: "bank", label: "Bank Transfer", icon: "🏦" },
     { id: "ussd", label: "USSD", icon: "📱" },
     { id: "qr", label: "QR Code", icon: "📲" },
-    { id: "eft", label: "EFT", icon: "💸" },
+    { id: "eft", label: "EFT (South Africa)", icon: "💸" },
     { id: "mobile_money", label: "Mobile Money", icon: "📞" },
+    { id: "barter", label: "Barter by Flutterwave", icon: "🔄" },
+    { id: "bank_transfer", label: "Direct Bank", icon: "🏧" },
   ]
 
   const cartItems = useSelector((state: RootState) => state.cart.items)
@@ -269,8 +271,8 @@ export default function CheckoutPage() {
                 <div>
                   <h2 className="font-grotesk text-2xl font-bold text-foreground mb-6">Select Payment Method</h2>
                   <div className="space-y-4">
-                    <p className="text-sm text-muted-foreground mb-4">Choose your preferred payment channel:</p>
-                    <div className="grid grid-cols-2 gap-3">
+                    <p className="text-sm text-muted-foreground mb-4">All available payment channels are selected. You can deselect any you don't want to use:</p>
+                    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
                       {paymentChannels.map((channel) => (
                         <button
                           key={channel.id}
