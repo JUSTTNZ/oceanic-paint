@@ -297,7 +297,7 @@ export default function CheckoutPage() {
                     </div>
                   </div>
                 </div>
-              )}}
+              )}
 
               {/* Review Step */}
               {step === "review" && (
