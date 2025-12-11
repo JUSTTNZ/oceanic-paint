@@ -20,18 +20,6 @@ export default function CheckoutPage() {
   const [zipCode, setZipCode] = useState("")
   const [country, setCountry] = useState("Nigeria")
   const [phone, setPhone] = useState("")
-  const [selectedChannels, setSelectedChannels] = useState<string[]>(["card", "bank", "ussd", "qr", "eft", "mobile_money", "barter", "bank_transfer"])
-
-  const paymentChannels = [
-    { id: "card", label: "Credit/Debit Card", icon: "💳" },
-    { id: "bank", label: "Bank Transfer", icon: "🏦" },
-    { id: "ussd", label: "USSD", icon: "📱" },
-    { id: "qr", label: "QR Code", icon: "📲" },
-    { id: "eft", label: "EFT (South Africa)", icon: "💸" },
-    { id: "mobile_money", label: "Mobile Money", icon: "📞" },
-    { id: "barter", label: "Barter by Flutterwave", icon: "🔄" },
-    { id: "bank_transfer", label: "Direct Bank", icon: "🏧" },
-  ]
 
   const cartItems = useSelector((state: RootState) => state.cart.items)
   const user = useSelector((state: RootState) => state.auth.user)
@@ -108,7 +96,6 @@ export default function CheckoutPage() {
           email: user.email || email,
           amount: total, // amount in Naira (the initialize endpoint converts to kobo)
           orderId: order.order.id, // Pass the order ID from response
-          channels: selectedChannels.length > 0 ? selectedChannels : ["card"],
         }),
       })
 
@@ -269,33 +256,29 @@ export default function CheckoutPage() {
               {/* Payment Step */}
               {step === "payment" && (
                 <div>
-                  <h2 className="font-grotesk text-2xl font-bold text-foreground mb-6">Select Payment Method</h2>
+                  <h2 className="font-grotesk text-2xl font-bold text-foreground mb-6">Payment Method</h2>
                   <div className="space-y-4">
-                    <p className="text-sm text-muted-foreground mb-4">All available payment channels are selected. You can deselect any you don't want to use:</p>
-                    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
-                      {paymentChannels.map((channel) => (
-                        <button
-                          key={channel.id}
-                          onClick={() => {
-                            if (selectedChannels.includes(channel.id)) {
-                              setSelectedChannels(selectedChannels.filter((c) => c !== channel.id))
-                            } else {
-                              setSelectedChannels([channel.id])
-                            }
-                          }}
-                          className={`p-4 border-2 rounded-lg transition flex flex-col items-center gap-2 ${
-                            selectedChannels.includes(channel.id)
-                              ? "border-primary bg-primary/5"
-                              : "border-border hover:border-primary/50"
-                          }`}
-                        >
-                          <span className="text-2xl">{channel.icon}</span>
-                          <span className="font-medium text-sm text-foreground text-center">{channel.label}</span>
-                        </button>
-                      ))}
-                    </div>
-                    <div className="p-4 bg-blue-50 border border-blue-200 rounded text-sm text-blue-900">
-                      ✓ All payment methods are secure and encrypted
+                    <div className="p-6 border-2 border-primary rounded-lg bg-primary/5">
+                      <div className="flex items-center gap-4 mb-4">
+                        <div className="w-12 h-8 bg-green-600 rounded flex items-center justify-center">
+                          <span className="text-white font-bold text-sm">P</span>
+                        </div>
+                        <div>
+                          <h3 className="font-bold text-foreground">Paystack</h3>
+                          <p className="text-sm text-muted-foreground">Secure payment processing</p>
+                        </div>
+                      </div>
+                      <p className="text-sm text-muted-foreground mb-4">
+                        You'll be redirected to Paystack to complete your payment securely.
+                      </p>
+                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                        <Check size={16} className="text-green-600" />
+                        <span>Secure SSL encryption</span>
+                      </div>
+                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                        <Check size={16} className="text-green-600" />
+                        <span>Card, Bank Transfer, USSD supported</span>
+                      </div>
                     </div>
                   </div>
                 </div>
