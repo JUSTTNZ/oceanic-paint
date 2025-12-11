@@ -5,7 +5,7 @@ import { createSupabaseServerClient } from "@/lib/supabase-server";
 export async function POST(request: Request) {
   try {
     const body = await request.json().catch(() => ({}));
-    const { email, amount, orderId } = body;
+    const { email, amount, orderId, channels } = body;
 
     if (!email || !amount || !orderId) {
       return NextResponse.json({ error: "Missing required fields: email, amount, and orderId" }, { status: 400 });
@@ -40,7 +40,7 @@ export async function POST(request: Request) {
         order_id: orderId,
         user_id: order.user_id
       },
-      channels: ["card", "bank"]
+      channels: channels && Array.isArray(channels) && channels.length > 0 ? channels : ["card", "bank", "ussd"],
     };
 
     const resp = await axios.post("https://api.paystack.co/transaction/initialize", payload, {
