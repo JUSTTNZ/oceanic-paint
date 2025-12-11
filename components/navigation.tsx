@@ -94,7 +94,7 @@ export default function Navigation() {
             {/* Cart Icon */}
             <Link href="/cart" className="relative">
               <ShoppingCart size={20} className="text-foreground hover:text-primary transition" />
-              {cartItems.length > 0 && (
+              {mounted && cartItems.length > 0 && (
                 <span className="absolute -top-2 -right-2 bg-secondary text-secondary-foreground text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold">
                   {cartItems.length}
                 </span>

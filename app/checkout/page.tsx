@@ -99,12 +99,19 @@ export default function CheckoutPage() {
         }),
       })
 
-      if (!paymentResponse.ok) {
-        const errorData = await paymentResponse.json()
-        throw new Error(errorData.error || "Failed to initialize payment")
+      // Safely parse response; if server returned HTML (404/500), surface useful debug info
+      let paymentData: any = null
+      try {
+        paymentData = await paymentResponse.json()
+      } catch (parseErr) {
+        const text = await paymentResponse.text().catch(() => "<unreadable>")
+        console.error("/api/payments/paystack/initialize returned non-JSON", paymentResponse.status, text)
+        throw new Error(`Failed to initialize payment (status ${paymentResponse.status})`)
       }
 
-      const paymentData = await paymentResponse.json()
+      if (!paymentResponse.ok) {
+        throw new Error(paymentData.error || paymentData?.message || "Failed to initialize payment")
+      }
       
       // 3. Redirect to Paystack checkout
       if (paymentData.data?.authorization_url) {
