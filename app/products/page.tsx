@@ -172,6 +172,8 @@ export default function ProductsPage() {
                 <select
                   value={sortBy}
                   onChange={(e) => setSortBy(e.target.value)}
+                  title="Sort products by"
+                  aria-label="Sort products by"
                   className="w-full px-4 py-2 border border-border rounded bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
                 >
                   <option value="featured">Featured</option>

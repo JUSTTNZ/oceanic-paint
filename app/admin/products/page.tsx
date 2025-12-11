@@ -295,6 +295,8 @@ export default function ProductsManagementPage() {
               <div>
                 <label className="block text-sm font-medium text-foreground mb-2">Category *</label>
                 <select
+                  title="Product category"
+                  aria-label="Product category"
                   value={category}
                   onChange={(e) => setCategory(e.target.value)}
                   className="w-full px-4 py-2 border border-border rounded bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
@@ -392,7 +394,7 @@ export default function ProductsManagementPage() {
                 {imageFile ? imageFile.name : "Choose an image file"}
               </button>
 
-              {imagePreview && (
+                  {imagePreview && (
                 <div className="mt-4 relative w-32 h-32">
                   <img src={imagePreview} alt="Preview" className="w-full h-full object-cover rounded border border-border" />
                   <button
@@ -400,6 +402,8 @@ export default function ProductsManagementPage() {
                     onClick={() => { setImageFile(null); setImagePreview(null) }}
                     className="absolute -top-2 -right-2 bg-destructive text-white rounded-full w-6 h-6 flex items-center justify-center text-sm"
                     disabled={uploading}
+                    title="Remove image"
+                    aria-label="Remove image"
                   >×</button>
                 </div>
               )}
@@ -489,12 +493,16 @@ export default function ProductsManagementPage() {
                                 setImagePreview(product.image || null)
                                 setShowForm(true)
                               }}
+                              title="Edit product"
+                              aria-label={`Edit product ${product.name}`}
                             >
                               <Edit size={18} />
                             </button>
                             <button
                               className="text-destructive hover:text-destructive/80 transition"
                               onClick={() => handleDelete(product.id)}
+                              title="Delete product"
+                              aria-label={`Delete product ${product.name}`}
                             >
                               <Trash2 size={18} />
                             </button>

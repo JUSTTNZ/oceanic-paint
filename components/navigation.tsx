@@ -71,7 +71,7 @@ export default function Navigation() {
                       <User size={18} />
                      
                     </Link>
-                    <button onClick={handleLogout} className="text-foreground hover:text-primary transition">
+                    <button onClick={handleLogout} className="text-foreground hover:text-primary transition" title="Logout">
                       <LogOut size={18} />
                     </button>
                   </div>
@@ -102,7 +102,7 @@ export default function Navigation() {
             </Link>
 
             {/* Mobile Menu Button */}
-            <button onClick={() => setMobileOpen(!mobileOpen)} className="md:hidden text-foreground">
+            <button onClick={() => setMobileOpen(!mobileOpen)} className="md:hidden text-foreground" title="Toggle menu">
               {mobileOpen ? <X size={24} /> : <Menu size={24} />}
             </button>
           </div>

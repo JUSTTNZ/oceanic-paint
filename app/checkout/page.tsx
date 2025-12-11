@@ -86,21 +86,16 @@ export default function CheckoutPage() {
 
       const order = await orderResponse.json()
       
-      // 2. Initialize Paystack payment
-      const paymentResponse = await fetch("/api/payments/paystack", {
+      // 2. Initialize Paystack payment using the initialize endpoint
+      const paymentResponse = await fetch("/api/payments/paystack/initialize", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
           email: user.email || email,
-          amount: Math.round(total * 100), // Paystack expects amount in kobo (1 NGN = 100 kobo)
-          reference: `PAYSTACK_${Date.now()}_${order.order.id}`,
-          metadata: {
-            order_id: order.order.id,
-            user_id: user.id,
-            order_number: order.order.order_number
-          }
+          amount: total, // amount in Naira (the initialize endpoint converts to kobo)
+          orderId: order.order.id, // Pass the order ID from response
         }),
       })
 
