@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import Link from "next/link"
 import { ChevronLeft, Check, Loader2 } from "lucide-react"
 import Navigation from "@/components/navigation"
@@ -8,6 +8,20 @@ import Footer from "@/components/footer"
 import { useSelector } from "react-redux"
 import type { RootState } from "@/lib/store"
 import { formatPrice } from "@/components/formatprice"
+
+// Declare PaystackPop type
+interface PaystackPopType {
+  setup: (options: {
+    key: string | undefined;
+    email: string;
+    amount: number;
+    currency: string;
+    ref: string;
+    metadata?: Record<string, any>;
+    callback: (response: { reference: string }) => void;
+    onClose: () => void;
+  }) => { openIframe: () => void };
+}
 
 export default function CheckoutPage() {
   const [step, setStep] = useState<"shipping" | "payment" | "review">("shipping")
@@ -33,21 +47,113 @@ export default function CheckoutPage() {
     { id: "review", label: "Review" },
   ]
 
+  // Load Paystack script
+  useEffect(() => {
+    const script = document.createElement("script")
+    script.src = "https://js.paystack.co/v1/inline.js"
+    script.async = true
+    document.body.appendChild(script)
+    return () => {
+      if (document.body.contains(script)) {
+        document.body.removeChild(script)
+      }
+    }
+  }, [])
+
+  // Generate unique reference
+  function generateReference() {
+    return "order_" + Math.random().toString(36).substr(2, 9) + Date.now()
+  }
+
   const handleContinue = () => {
     if (step === "shipping") setStep("payment")
     else if (step === "payment") setStep("review")
   }
 
+  const onPaymentSuccess = async (reference: string) => {
+    console.log("Payment successful:", reference)
+    alert("Payment successful! Order ID: " + reference)
+    // You can redirect to success page or update order status
+    // window.location.href = `/orders/success?ref=${reference}`
+  }
+
+  const onPaymentClose = () => {
+    console.log("Payment popup closed")
+    setLoading(false)
+  }
+
+  const payWithPaystack = (orderRef: string, orderId: string) => {
+  const paystackPop = (window as { PaystackPop?: PaystackPopType }).PaystackPop
+
+  // Verify Paystack loaded
+  if (!paystackPop) {
+    console.error("PaystackPop is not available")
+    alert("Paystack SDK failed to load. Please refresh and try again.")
+    setLoading(false)
+    return
+  }
+
+  // Verify key is set
+  const publicKey = process.env.NEXT_PUBLIC_PAYSTACK_KEY
+  console.log('Paystack Key Check:', publicKey ? `${publicKey.substring(0, 7)}...` : 'NOT SET')
+  
+  if (!publicKey) {
+    console.error("Paystack public key is not set")
+    alert("Payment configuration error. Please contact support.")
+    setLoading(false)
+    return
+  }
+
+  // Verify key format
+  if (!publicKey.startsWith('pk_')) {
+    console.error("Invalid Paystack key format - must start with pk_")
+    alert("Invalid payment configuration. Please contact support.")
+    setLoading(false)
+    return
+  }
+
+  console.log('Initializing payment with:', {
+    email: user?.email || email,
+    amount: Math.round(total * 100),
+    currency: 'NGN',
+    ref: orderRef,
+    orderId: orderId
+  })
+
+  const handler = paystackPop.setup({
+    key: publicKey,
+    email: user?.email || email,
+    amount: Math.round(total * 100),
+    currency: "NGN",
+    ref: orderRef,
+    metadata: {
+      order_id: orderId,
+      customer_name: `${firstName} ${lastName}`,
+      phone_number: phone
+    },
+    callback: function (response: { reference: string }) {
+      console.log('Payment successful:', response)
+      onPaymentSuccess(response.reference)
+    },
+    onClose: function () {
+      console.log('Payment popup closed')
+      onPaymentClose()
+    },
+  })
+
+  handler.openIframe()
+}
+
   const handlePayment = async () => {
-    if (!user) {
-      alert("Please login to continue")
+    if (!user && !email) {
+      alert("Please provide an email address")
       return
     }
 
     setLoading(true)
 
     try {
-      // 1. Create order in your database
+      // Create order in your backend
       const orderData = {
         cartItems: cartItems.map(item => ({
           product_id: item.id,
@@ -64,13 +170,13 @@ export default function CheckoutPage() {
           city,
           zipCode,
           country,
-          email,
+          email: user?.email || email,
           phone
         },
-        paymentMethod: "paystack"
+        paymentMethod: "paystack",
+        status: "pending"
       }
 
-      // Create order via API
       const orderResponse = await fetch("/api/orders", {
         method: "POST",
         headers: {
@@ -85,40 +191,10 @@ export default function CheckoutPage() {
       }
 
       const order = await orderResponse.json()
-      
-      // 2. Initialize Paystack payment using the initialize endpoint
-      const paymentResponse = await fetch("/api/payments/paystack/initialize", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          email: user.email || email,
-          amount: total, // amount in Naira (the initialize endpoint converts to kobo)
-          orderId: order.order.id, // Pass the order ID from response
-        }),
-      })
+      const orderReference = generateReference()
 
-      // Safely parse response; if server returned HTML (404/500), surface useful debug info
-      let paymentData: any = null
-      try {
-        paymentData = await paymentResponse.json()
-      } catch (parseErr) {
-        const text = await paymentResponse.text().catch(() => "<unreadable>")
-        console.error("/api/payments/paystack/initialize returned non-JSON", paymentResponse.status, text)
-        throw new Error(`Failed to initialize payment (status ${paymentResponse.status})`)
-      }
-
-      if (!paymentResponse.ok) {
-        throw new Error(paymentData.error || paymentData?.message || "Failed to initialize payment")
-      }
-      
-      // 3. Redirect to Paystack checkout
-      if (paymentData.data?.authorization_url) {
-        window.location.href = paymentData.data.authorization_url
-      } else {
-        throw new Error("No payment URL returned from Paystack")
-      }
+      // Open Paystack payment popup directly
+      payWithPaystack(orderReference, order.order.id)
 
     } catch (error) {
       console.error("Payment error:", error)
@@ -159,94 +235,127 @@ export default function CheckoutPage() {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+
           {/* Form Content */}
           <div className="lg:col-span-2">
             <div className="bg-card border border-border rounded-lg p-8">
-              {/* Shipping Step */}
+
+              {/* SHIPPING STEP */}
               {step === "shipping" && (
                 <div>
                   <h2 className="font-grotesk text-2xl font-bold text-foreground mb-6">Shipping Address</h2>
+
                   <div className="space-y-4">
                     <div className="grid grid-cols-2 gap-4">
                       <div>
-                        <label className="block text-sm font-medium text-foreground mb-2">First Name *</label>
+                        <label htmlFor="firstName" className="block text-sm font-medium text-foreground mb-2">
+                          First Name *
+                        </label>
                         <input
+                          id="firstName"
                           type="text"
                           value={firstName}
                           onChange={(e) => setFirstName(e.target.value)}
-                          className="w-full px-4 py-2 border border-border rounded bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+                          className="w-full px-4 py-2 border border-border rounded bg-background text-foreground"
                           required
                         />
                       </div>
+
                       <div>
-                        <label className="block text-sm font-medium text-foreground mb-2">Last Name *</label>
+                        <label htmlFor="lastName" className="block text-sm font-medium text-foreground mb-2">
+                          Last Name *
+                        </label>
                         <input
+                          id="lastName"
                           type="text"
                           value={lastName}
                           onChange={(e) => setLastName(e.target.value)}
-                          className="w-full px-4 py-2 border border-border rounded bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+                          className="w-full px-4 py-2 border border-border rounded bg-background text-foreground"
                           required
                         />
                       </div>
                     </div>
+
                     <div>
-                      <label className="block text-sm font-medium text-foreground mb-2">Email *</label>
+                      <label htmlFor="email" className="block text-sm font-medium text-foreground mb-2">
+                        Email *
+                      </label>
                       <input
+                        id="email"
                         type="email"
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
-                        className="w-full px-4 py-2 border border-border rounded bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+                        className="w-full px-4 py-2 border border-border rounded bg-background text-foreground"
                         required
                       />
                     </div>
+
                     <div>
-                      <label className="block text-sm font-medium text-foreground mb-2">Phone Number *</label>
+                      <label htmlFor="phone" className="block text-sm font-medium text-foreground mb-2">
+                        Phone Number *
+                      </label>
                       <input
+                        id="phone"
                         type="tel"
                         value={phone}
                         onChange={(e) => setPhone(e.target.value)}
-                        className="w-full px-4 py-2 border border-border rounded bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-                        placeholder="+234"
+                        className="w-full px-4 py-2 border border-border rounded bg-background text-foreground"
                         required
                       />
                     </div>
+
                     <div>
-                      <label className="block text-sm font-medium text-foreground mb-2">Address *</label>
+                      <label htmlFor="address" className="block text-sm font-medium text-foreground mb-2">
+                        Address *
+                      </label>
                       <textarea
+                        id="address"
                         value={address}
                         onChange={(e) => setAddress(e.target.value)}
-                        className="w-full px-4 py-2 border border-border rounded bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+                        className="w-full px-4 py-2 border border-border rounded bg-background text-foreground"
                         rows={3}
                         required
                       />
                     </div>
+
                     <div className="grid grid-cols-2 gap-4">
                       <div>
-                        <label className="block text-sm font-medium text-foreground mb-2">City *</label>
+                        <label htmlFor="city" className="block text-sm font-medium text-foreground mb-2">
+                          City *
+                        </label>
                         <input
+                          id="city"
                           type="text"
                           value={city}
                           onChange={(e) => setCity(e.target.value)}
-                          className="w-full px-4 py-2 border border-border rounded bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+                          className="w-full px-4 py-2 border border-border rounded bg-background text-foreground"
                           required
                         />
                       </div>
+
                       <div>
-                        <label className="block text-sm font-medium text-foreground mb-2">Zip Code</label>
+                        <label htmlFor="zipCode" className="block text-sm font-medium text-foreground mb-2">
+                          Zip Code
+                        </label>
                         <input
+                          id="zipCode"
                           type="text"
                           value={zipCode}
                           onChange={(e) => setZipCode(e.target.value)}
-                          className="w-full px-4 py-2 border border-border rounded bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+                          className="w-full px-4 py-2 border border-border rounded bg-background text-foreground"
                         />
                       </div>
                     </div>
+
                     <div>
-                      <label className="block text-sm font-medium text-foreground mb-2">Country *</label>
+                      <label htmlFor="country" className="block text-sm font-medium text-foreground mb-2">
+                        Country *
+                      </label>
                       <select
+                        id="country"
                         value={country}
                         onChange={(e) => setCountry(e.target.value)}
-                        className="w-full px-4 py-2 border border-border rounded bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+                        className="w-full px-4 py-2 border border-border rounded bg-background text-foreground"
                         required
                       >
                         <option value="Nigeria">Nigeria</option>
@@ -260,44 +369,54 @@ export default function CheckoutPage() {
                 </div>
               )}
 
-              {/* Payment Step */}
+              {/* PAYMENT STEP */}
               {step === "payment" && (
                 <div>
                   <h2 className="font-grotesk text-2xl font-bold text-foreground mb-6">Payment Method</h2>
-                  <div className="space-y-4">
-                    <div className="p-6 border-2 border-primary rounded-lg bg-primary/5">
-                      <div className="flex items-center gap-4 mb-4">
-                        <div className="w-12 h-8 bg-green-600 rounded flex items-center justify-center">
-                          <span className="text-white font-bold text-sm">P</span>
-                        </div>
-                        <div>
-                          <h3 className="font-bold text-foreground">Paystack</h3>
-                          <p className="text-sm text-muted-foreground">Secure payment processing</p>
-                        </div>
+
+                  <div className="p-6 border-2 border-primary rounded-lg bg-primary/5">
+                    <div className="flex items-center gap-4 mb-4">
+                      <div className="w-12 h-8 bg-green-600 rounded flex items-center justify-center">
+                        <span className="text-white font-bold text-sm">P</span>
                       </div>
-                      <p className="text-sm text-muted-foreground mb-4">
-                        You'll be redirected to Paystack to complete your payment securely.
-                      </p>
+                      <div>
+                        <h3 className="font-bold text-foreground">Paystack</h3>
+                        <p className="text-sm text-muted-foreground">Secure payment processing</p>
+                      </div>
+                    </div>
+
+                    <p className="text-sm text-muted-foreground mb-4">
+                      Click "Pay Now" to complete your payment securely with Paystack.
+                    </p>
+
+                    <div className="space-y-2">
                       <div className="flex items-center gap-2 text-sm text-muted-foreground">
                         <Check size={16} className="text-green-600" />
                         <span>Secure SSL encryption</span>
                       </div>
+
                       <div className="flex items-center gap-2 text-sm text-muted-foreground">
                         <Check size={16} className="text-green-600" />
                         <span>Card, Bank Transfer, USSD supported</span>
+                      </div>
+
+                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                        <Check size={16} className="text-green-600" />
+                        <span>Instant payment confirmation</span>
                       </div>
                     </div>
                   </div>
                 </div>
               )}
 
-              {/* Review Step */}
+              {/* REVIEW STEP */}
               {step === "review" && (
                 <div>
                   <h2 className="font-grotesk text-2xl font-bold text-foreground mb-6">Review Your Order</h2>
+
                   <div className="space-y-4">
                     <div className="bg-muted/30 p-4 rounded">
-                      <h3 className="font-bold text-foreground mb-2">Shipping Address</h3>
+                      <h3 className="font-bold mb-2">Shipping Address</h3>
                       <p className="text-sm text-muted-foreground">
                         {firstName} {lastName}
                         <br />
@@ -312,15 +431,18 @@ export default function CheckoutPage() {
                         {country}
                       </p>
                     </div>
+
                     <div className="bg-muted/30 p-4 rounded">
-                      <h3 className="font-bold text-foreground mb-3">Payment Method</h3>
+                      <h3 className="font-bold mb-3">Payment Method</h3>
                       <div className="flex items-center gap-2">
                         <div className="w-8 h-6 bg-green-600 rounded"></div>
                         <span className="text-sm font-medium">Paystack</span>
                       </div>
                     </div>
+
                     <div className="bg-muted/30 p-4 rounded">
-                      <h3 className="font-bold text-foreground mb-3">Order Items</h3>
+                      <h3 className="font-bold mb-3">Order Items</h3>
+
                       <div className="space-y-2">
                         {cartItems.map((item) => (
                           <div key={item.id} className="flex justify-between text-sm text-foreground">
@@ -338,40 +460,44 @@ export default function CheckoutPage() {
                 </div>
               )}
 
-              {/* Buttons */}
+              {/* BUTTONS */}
               <div className="flex gap-4 mt-8">
                 {step !== "shipping" && (
                   <button
+                    type="button"
                     onClick={() => {
                       if (step === "payment") setStep("shipping")
                       else if (step === "review") setStep("payment")
                     }}
-                    className="flex-1 px-6 py-3 border-2 border-primary text-primary rounded font-bold hover:bg-primary/5 transition disabled:opacity-50"
+                    className="flex-1 px-6 py-3 border-2 border-primary text-primary rounded font-bold hover:bg-primary/5 transition"
                     disabled={loading}
                   >
                     Back
                   </button>
                 )}
+
                 {step === "review" ? (
                   <button
+                    type="button"
                     onClick={handlePayment}
-                    disabled={loading || !firstName || !lastName || !email || !phone || !address || !city}
-                    className="flex-1 px-6 py-3 bg-primary text-primary-foreground rounded font-bold hover:opacity-90 transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                    disabled={loading}
+                    className="flex-1 px-6 py-3 bg-primary text-primary-foreground rounded font-bold hover:opacity-90 transition flex items-center justify-center gap-2 disabled:opacity-50"
                   >
                     {loading ? (
                       <>
                         <Loader2 size={20} className="animate-spin" />
-                        Processing Payment...
+                        Processing...
                       </>
                     ) : (
-                      "Pay with Paystack"
+                      "Pay Now"
                     )}
                   </button>
                 ) : (
                   <button
+                    type="button"
                     onClick={handleContinue}
                     disabled={
-                      step === "shipping" && 
+                      step === "shipping" &&
                       (!firstName || !lastName || !email || !phone || !address || !city)
                     }
                     className="flex-1 px-6 py-3 bg-primary text-primary-foreground rounded font-bold hover:opacity-90 transition disabled:opacity-50"
@@ -383,40 +509,42 @@ export default function CheckoutPage() {
             </div>
           </div>
 
-          {/* Order Summary Sidebar */}
-      <div className="lg:col-span-1">
-  <div className="border border-border rounded-lg p-6 bg-card sticky top-20">
-    <h2 className="font-grotesk font-bold text-xl text-foreground mb-6">Order Summary</h2>
-    <div className="space-y-3 mb-6 max-h-64 overflow-y-auto">
-      {cartItems.map((item) => (
-        <div key={item.id} className="flex justify-between text-sm text-foreground">
-          <span className="truncate max-w-[120px]">
-            {item.name} ({item.quantity}x)
-          </span>
-          <span className="flex-shrink-0">{formatPrice(item.price * item.quantity)}</span>
-        </div>
-      ))}
-    </div>
-    <div className="border-t border-border pt-4 space-y-2">
-      <div className="flex justify-between text-foreground">
-        <span>Subtotal</span>
-        <span>{formatPrice(subtotal)}</span>
-      </div>
-      <div className="flex justify-between text-foreground">
-        <span>Tax (10%)</span>
-        <span>{formatPrice(tax)}</span>
-      </div>
-      <div className="flex justify-between text-foreground">
-        <span>Shipping</span>
-        <span>Free</span>
-      </div>
-      <div className="flex justify-between font-grotesk font-bold text-lg text-foreground pt-4 border-t border-border">
-        <span>Total</span>
-        <span>{formatPrice(total)}</span>
-      </div>
-    </div>
-  </div>
-</div>
+          {/* ORDER SUMMARY */}
+          <div className="lg:col-span-1">
+            <div className="border border-border rounded-lg p-6 bg-card sticky top-20">
+              <h2 className="font-grotesk font-bold text-xl text-foreground mb-6">Order Summary</h2>
+
+              <div className="space-y-3 mb-6 max-h-64 overflow-y-auto">
+                {cartItems.map((item) => (
+                  <div key={item.id} className="flex justify-between text-sm text-foreground">
+                    <span className="truncate max-w-[120px]">
+                      {item.name} ({item.quantity}x)
+                    </span>
+                    <span>{formatPrice(item.price * item.quantity)}</span>
+                  </div>
+                ))}
+              </div>
+
+              <div className="border-t border-border pt-4 space-y-2">
+                <div className="flex justify-between">
+                  <span>Subtotal</span>
+                  <span>{formatPrice(subtotal)}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span>Tax (10%)</span>
+                  <span>{formatPrice(tax)}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span>Shipping</span>
+                  <span>Free</span>
+                </div>
+                <div className="flex justify-between font-grotesk font-bold text-lg pt-4 border-t border-border">
+                  <span>Total</span>
+                  <span>{formatPrice(total)}</span>
+                </div>
+              </div>
+            </div>
+          </div>
 
         </div>
       </div>
